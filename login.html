@@ -192,24 +192,7 @@
         return;
       }
 
-      showToast('Google Sign-In is connecting... Please ensure GOOGLE_CLIENT_ID is added in server settings.', 'info');
-    }
-
-        showToast('Google Sign-In activated successfully!', 'success');
-        googleClientId = data.clientId;
-        closeGoogleSetupModal();
-        setupGoogleClients();
-
-        // Immediately trigger the account chooser popup
-        setTimeout(() => {
-          handleGoogleSignIn();
-        }, 300);
-      } catch (err) {
-        showToast(err.message, 'error');
-      } finally {
-        btn.disabled = false;
-        btn.textContent = 'Save & Activate Google Sign-In';
-      }
+      showToast('Google Sign-In is being connected. In the meantime, please sign in using your email and password below.', 'info');
     }
 
     // Handles response from Google OAuth2 Token Client (with account selection)
@@ -236,11 +219,7 @@
         showToast(`Welcome back, ${data.user.name}!`, 'success');
 
         setTimeout(() => {
-          if (data.user.role === 'admin') {
-            window.location.href = '/admin/';
-          } else {
-            window.location.href = 'index.html';
-          }
+          window.location.href = 'index.html';
         }, 700);
       } catch (err) {
         showToast(err.message, 'error');
@@ -264,11 +243,7 @@
         showToast(`Welcome back, ${data.user.name}!`, 'success');
 
         setTimeout(() => {
-          if (data.user.role === 'admin') {
-            window.location.href = '/admin/';
-          } else {
-            window.location.href = 'index.html';
-          }
+          window.location.href = 'index.html';
         }, 700);
       } catch (err) {
         showToast(err.message, 'error');
@@ -309,12 +284,8 @@
         showToast('Login successful!', 'success');
         
         setTimeout(() => {
-          if (data.user.role === 'admin') {
-            window.location.href = '/admin/';
-          } else {
-            window.location.href = 'index.html';
-          }
-        }, 800);
+          window.location.href = 'index.html';
+        }, 700);
       } catch (err) {
         showToast(err.message, 'error');
       } finally {

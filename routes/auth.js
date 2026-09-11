@@ -35,10 +35,28 @@ router.post('/register', (req, res) => {
       return res.status(409).json({ error: 'An account with this email already exists' });
     }
 
-    const hash = bcrypt.hashSync(password, 12);
-    const result = db.prepare('INSERT INTO users (name, email, phone, password_hash, role) VALUES (?, ?, ?, ?, ?)').run(name.trim(), email.toLowerCase().trim(), phone || '', hash, 'user');
+    const userId = result.lastInsertRowid;
+    const cleanEmail = email.toLowerCase().trim();
+    const cleanName = name.trim();
 
-    res.status(201).json({ message: 'Account created successfully. Please log in.', userId: result.lastInsertRowid });
+    const token = jwt.sign(
+      { id: userId, email: cleanEmail, role: 'user', name: cleanName },
+      SECRET,
+      { expiresIn: '7d' }
+    );
+
+    res.cookie('token', token, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 });
+    res.status(201).json({
+      message: 'Account created successfully! Welcome to Soniviva Market.',
+      token,
+      user: {
+        id: userId,
+        name: cleanName,
+        email: cleanEmail,
+        role: 'user',
+        phone: phone || ''
+      }
+    });
   } catch (err) {
     console.error('Register error:', err);
     res.status(500).json({ error: 'Registration failed. Please try again.' });

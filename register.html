@@ -145,16 +145,21 @@
           body: JSON.stringify({ name, email, phone, password: pwd })
         });
         
+        const data = await response.json().catch(() => ({}));
         if (!response.ok) {
-          const data = await response.json().catch(() => ({}));
-          throw new Error(data.message || 'Registration failed.');
+          throw new Error(data.error || data.message || 'Registration failed.');
         }
-        
-        showToast('Registration successful! Redirecting to login...', 'success');
-        
+
+        if (data.token && data.user) {
+          localStorage.setItem('soniviva_token', data.token);
+          localStorage.setItem('soniviva_user', JSON.stringify(data.user));
+        }
+
+        showToast(`Registration successful! Welcome to Soniviva, ${name}!`, 'success');
+
         setTimeout(() => {
-          window.location.href = 'login.html';
-        }, 2000);
+          window.location.href = 'index.html';
+        }, 700);
       } catch (err) {
         showToast(err.message, 'error');
       } finally {
@@ -241,7 +246,7 @@
         return;
       }
 
-      showToast('Google Sign-Up is connecting... Please ensure GOOGLE_CLIENT_ID is added in server settings.', 'info');
+      showToast('Google Sign-Up is being connected. In the meantime, please complete registration using the form below.', 'info');
     }
 
     // Handles response from Google OAuth2 Token Client (with account selection)
