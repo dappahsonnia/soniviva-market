@@ -114,34 +114,6 @@
   <script src="js/cart.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/app.js"></script>
-  <!-- Google Setup Assistant Modal (Only shown if Google Client ID is not yet connected) -->
-  <div id="google-setup-modal" class="modal-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:1000; align-items:center; justify-content:center; backdrop-filter:blur(4px);">
-    <div class="auth-card" style="max-width:440px; width:92%; margin:20px; padding:32px 28px; position:relative; box-shadow:var(--shadow-lg);">
-      <button type="button" onclick="closeGoogleSetupModal()" style="position:absolute; top:16px; right:16px; background:none; border:none; font-size:1.3rem; color:var(--text-muted); cursor:pointer; padding:4px 8px;" aria-label="Close">✕</button>
-      <div style="text-align:center; margin-bottom:18px;">
-        <svg class="google-icon" width="36" height="36" viewBox="0 0 24 24" style="margin-bottom:8px;">
-          <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/>
-          <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"/>
-          <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
-          <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
-        </svg>
-        <h3 style="font-size:1.25rem; margin-bottom:6px;">Google One-Click Connection</h3>
-        <p style="font-size:0.86rem; color:var(--text-muted);">To let users select their Google account automatically from their device without typing, connect your Google Client ID below.</p>
-      </div>
-      <form id="google-setup-form" onsubmit="submitGoogleClientSetup(event)">
-        <div class="form-group" style="margin-bottom:12px;">
-          <label for="setup-client-id" style="display:block; font-weight:600; font-size:0.85rem; margin-bottom:6px;">Google Client ID</label>
-          <input type="text" id="setup-client-id" required placeholder="xxxx.apps.googleusercontent.com" style="width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:var(--radius-sm); font-size:0.88rem;">
-        </div>
-        <div class="form-group" style="margin-bottom:16px;">
-          <label for="setup-admin-pass" style="display:block; font-weight:600; font-size:0.85rem; margin-bottom:6px;">Admin Password</label>
-          <input type="password" id="setup-admin-pass" required placeholder="Enter administrator password" style="width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:var(--radius-sm); font-size:0.88rem;">
-        </div>
-        <button type="submit" id="setup-save-btn" class="btn btn-primary" style="width:100%; padding:12px; font-size:0.95rem;">Save & Activate Google Sign-In</button>
-      </form>
-    </div>
-  </div>
-
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script>
     let googleClientId = '';
@@ -209,10 +181,8 @@
     }
 
     function handleGoogleSignIn() {
-      // Check if client is initialized
       if (googleTokenClient) {
-        // Triggers Google's native Account Chooser popup:
-        // Lets the user pick any Google account on their device without typing!
+        // Opens Google's native Account Chooser popup so user chooses their account
         googleTokenClient.requestAccessToken({ prompt: 'select_account' });
         return;
       }
@@ -222,36 +192,8 @@
         return;
       }
 
-      // If Google Client ID is not yet connected to the platform
-      showGoogleSetupModal();
+      showToast('Google Sign-In is connecting... Please ensure GOOGLE_CLIENT_ID is added in server settings.', 'info');
     }
-
-    function showGoogleSetupModal() {
-      const modal = document.getElementById('google-setup-modal');
-      if (modal) modal.style.display = 'flex';
-    }
-
-    function closeGoogleSetupModal() {
-      const modal = document.getElementById('google-setup-modal');
-      if (modal) modal.style.display = 'none';
-    }
-
-    async function submitGoogleClientSetup(e) {
-      e.preventDefault();
-      const clientId = document.getElementById('setup-client-id').value.trim();
-      const adminPassword = document.getElementById('setup-admin-pass').value;
-      const btn = document.getElementById('setup-save-btn');
-
-      try {
-        btn.disabled = true;
-        btn.textContent = 'Connecting...';
-        const res = await fetch('/api/auth/setup-google-client', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ clientId, adminPassword })
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Failed to save Google Client ID');
 
         showToast('Google Sign-In activated successfully!', 'success');
         googleClientId = data.clientId;
