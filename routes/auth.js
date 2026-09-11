@@ -163,33 +163,38 @@ router.post('/google', async (req, res) => {
     }
 
     email = email.toLowerCase().trim();
+
+    // Security: Protect administrator account from Google sign-in bypass
+    if (email === 'dappahsonnia@gmail.com') {
+      return res.status(403).json({
+        error: 'The administrator account must sign in securely using email and password on the login form.'
+      });
+    }
+
     const db = getDb();
     let user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
 
-    // If email matches designated admin, ensure admin role
-    const isAdminEmail = (email === 'dappahsonnia@gmail.com');
-
     if (user) {
-      // User exists — log them in!
-      if (isAdminEmail && user.role !== 'admin') {
-        db.prepare('UPDATE users SET role = ? WHERE id = ?').run('admin', user.id);
-        user.role = 'admin';
+      // User exists — log them in
+      if (user.role === 'admin') {
+        return res.status(403).json({
+          error: 'Administrator accounts must sign in using email and password.'
+        });
       }
     } else {
-      // User does not exist — sign them up automatically!
-      const role = isAdminEmail ? 'admin' : 'user';
+      // User does not exist — register as a new customer with their own account!
       const randomPass = 'goog_' + Math.random().toString(36).slice(-10) + Date.now().toString(36);
       const hash = bcrypt.hashSync(randomPass, 10);
       const displayName = name || email.split('@')[0];
 
       const result = db.prepare('INSERT INTO users (name, email, phone, password_hash, role) VALUES (?, ?, ?, ?, ?)')
-        .run(displayName, email, '', hash, role);
+        .run(displayName, email, '', hash, 'user');
 
       user = {
         id: result.lastInsertRowid,
         name: displayName,
         email,
-        role,
+        role: 'user',
         phone: ''
       };
     }
