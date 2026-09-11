@@ -33,19 +33,35 @@ function initMobileMenu() {
   const navLinks = document.querySelector('.nav-links');
   if (!toggle || !navLinks) return;
 
+  const closeMenu = () => {
+    toggle.classList.remove('active');
+    navLinks.classList.remove('active');
+    document.body.style.overflow = '';
+  };
+
   toggle.addEventListener('click', () => {
-    toggle.classList.toggle('active');
-    navLinks.classList.toggle('active');
-    document.body.style.overflow = navLinks.classList.contains('active') ? 'hidden' : '';
+    const isActive = toggle.classList.toggle('active');
+    navLinks.classList.toggle('active', isActive);
+    document.body.style.overflow = isActive ? 'hidden' : '';
   });
 
   // Close menu when a link is clicked
   navLinks.querySelectorAll('a').forEach(link => {
-    link.addEventListener('click', () => {
-      toggle.classList.remove('active');
-      navLinks.classList.remove('active');
-      document.body.style.overflow = '';
-    });
+    link.addEventListener('click', closeMenu);
+  });
+
+  // Close menu on Escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && navLinks.classList.contains('active')) {
+      closeMenu();
+    }
+  });
+
+  // Handle device orientation change / window resize
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 992 && navLinks.classList.contains('active')) {
+      closeMenu();
+    }
   });
 }
 

@@ -38,7 +38,7 @@ function showToast(msg, type = 'success') {
 function openModal(id) { document.getElementById(id)?.classList.add('active'); }
 function closeModal(id) { document.getElementById(id)?.classList.remove('active'); }
 
-// Sidebar active
+// Sidebar active & mobile toggle
 function initSidebar() {
   const page = location.pathname.split('/').pop() || 'index.html';
   document.querySelectorAll('.sidebar-nav a').forEach(a => {
@@ -47,6 +47,47 @@ function initSidebar() {
   const user = getUser();
   const nameEl = document.getElementById('admin-name');
   if (nameEl && user) nameEl.textContent = user.name;
+
+  // Responsive mobile sidebar handling
+  const topBar = document.querySelector('.top-bar');
+  const sidebar = document.querySelector('.sidebar');
+  if (topBar && sidebar) {
+    // Backdrop
+    let backdrop = document.querySelector('.sidebar-backdrop');
+    if (!backdrop) {
+      backdrop = document.createElement('div');
+      backdrop.className = 'sidebar-backdrop';
+      document.body.appendChild(backdrop);
+      backdrop.addEventListener('click', () => {
+        sidebar.classList.remove('open');
+        backdrop.classList.remove('active');
+      });
+    }
+
+    // Toggle button in top-bar
+    if (!topBar.querySelector('.sidebar-toggle')) {
+      const toggleBtn = document.createElement('button');
+      toggleBtn.className = 'sidebar-toggle';
+      toggleBtn.setAttribute('aria-label', 'Toggle Navigation Menu');
+      toggleBtn.innerHTML = '☰';
+      topBar.insertBefore(toggleBtn, topBar.firstChild);
+
+      toggleBtn.addEventListener('click', () => {
+        const isOpen = sidebar.classList.toggle('open');
+        backdrop.classList.toggle('active', isOpen);
+      });
+    }
+
+    // Close on navigation
+    sidebar.querySelectorAll('.sidebar-nav a').forEach(link => {
+      link.addEventListener('click', () => {
+        if (window.innerWidth <= 768) {
+          sidebar.classList.remove('open');
+          backdrop?.classList.remove('active');
+        }
+      });
+    });
+  }
 }
 
 // ─── Dashboard page ───
