@@ -11,11 +11,34 @@ const { initDatabase } = require('./db/database');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// ─── Ensure Database Initialized ───
+let initDbPromise = null;
+function ensureDb() {
+  if (!initDbPromise) {
+    initDbPromise = initDatabase().catch(err => {
+      console.error('Database initialization error:', err);
+      initDbPromise = null; // allow retry on next request
+      throw err;
+    });
+  }
+  return initDbPromise;
+}
+
 // ─── Middleware ───
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+
+// Database readiness check for all requests
+app.use(async (req, res, next) => {
+  try {
+    await ensureDb();
+    next();
+  } catch (err) {
+    res.status(500).json({ error: 'Database service unavailable', details: err.message });
+  }
+});
 
 // ─── Static files ───
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -58,10 +81,9 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Internal server error' });
 });
 
-// ─── Start server ───
-async function start() {
-  try {
-    await initDatabase();
+// ─── Start server (Standalone / Local / Render) ───
+if (require.main === module && !process.env.VERCEL) {
+  ensureDb().then(() => {
     app.listen(PORT, () => {
       console.log('');
       console.log('  ╔═══════════════════════════════════════╗');
@@ -73,10 +95,10 @@ async function start() {
       console.log('  ╚═══════════════════════════════════════╝');
       console.log('');
     });
-  } catch (err) {
+  }).catch(err => {
     console.error('Failed to start server:', err);
     process.exit(1);
-  }
+  });
 }
 
-start();
+module.exports = app;

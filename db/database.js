@@ -8,17 +8,26 @@ const fs = require('fs');
 const path = require('path');
 const bcrypt = require('bcryptjs');
 
-const DB_PATH = path.join(__dirname, 'soniviva.db');
+const os = require('os');
+const isVercel = Boolean(process.env.VERCEL);
+const DB_PATH = isVercel
+  ? path.join(os.tmpdir(), 'soniviva.db')
+  : path.join(__dirname, 'soniviva.db');
 
 let db = null;
 
 // ─── save helper: persist in-memory db to disk ───
 function saveDatabase() {
   if (!db) return;
-  const raw = db._db || db;
-  const data = raw.export();
-  const buffer = Buffer.from(data);
-  fs.writeFileSync(DB_PATH, buffer);
+  try {
+    const raw = db._db || db;
+    const data = raw.export();
+    const buffer = Buffer.from(data);
+    fs.writeFileSync(DB_PATH, buffer);
+  } catch (err) {
+    // In serverless environments, ignore read-only disk warnings; memory db is maintained
+    console.warn('Database disk write skipped/failed:', err.message);
+  }
 }
 
 // ─── Wrapper to give sql.js a better-sqlite3-like API ───
@@ -99,13 +108,37 @@ class Database {
 
 // ─── Initialize database ───
 async function initDatabase() {
+  if (db) return db;
   const SQL = await initSqlJs();
+
+  const prebuiltPath = path.join(__dirname, 'soniviva.db');
 
   // Load existing database or create new one
   if (fs.existsSync(DB_PATH)) {
-    const fileBuffer = fs.readFileSync(DB_PATH);
-    db = new Database(new SQL.Database(fileBuffer));
-    console.log('📦 Loaded existing database from', DB_PATH);
+    try {
+      const fileBuffer = fs.readFileSync(DB_PATH);
+      db = new Database(new SQL.Database(fileBuffer));
+      console.log('📦 Loaded existing database from', DB_PATH);
+    } catch (e) {
+      console.warn('Could not read existing database, creating fresh:', e.message);
+      db = new Database(new SQL.Database());
+      createTables();
+      seedData();
+    }
+  } else if (fs.existsSync(prebuiltPath)) {
+    try {
+      const fileBuffer = fs.readFileSync(prebuiltPath);
+      db = new Database(new SQL.Database(fileBuffer));
+      console.log('📦 Loaded prebuilt database from', prebuiltPath);
+      // Try to copy to writable DB_PATH for subsequent operations
+      try {
+        fs.writeFileSync(DB_PATH, fileBuffer);
+      } catch (err) {}
+    } catch (e) {
+      db = new Database(new SQL.Database());
+      createTables();
+      seedData();
+    }
   } else {
     db = new Database(new SQL.Database());
     console.log('🆕 Created new database');
