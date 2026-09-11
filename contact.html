@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact Us — SONIVIVA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar scrolled">
+    <div class="nav-container">
+      <a href="index.html" class="nav-logo">SONI<span>VIVA</span></a>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="shop.html">Shop</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="contact.html" class="active">Contact</a></li>
+      </ul>
+      <div class="nav-actions">
+        <a href="cart.html" class="cart-link" title="Shopping Cart">
+          <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0"/></svg>
+          <span class="cart-count hidden">0</span>
+        </a>
+      </div>
+      <button class="mobile-toggle" aria-label="Toggle menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Page Header -->
+  <section class="page-header">
+    <div class="container">
+      <h1>Contact Us</h1>
+      <p>We'd love to hear from you. Get in touch with us today!</p>
+      <div class="breadcrumb">
+        <a href="index.html">Home</a>
+        <span>/</span>
+        <span class="current">Contact</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Content -->
+  <section class="section">
+    <div class="container">
+      <div class="contact-grid">
+
+        <!-- Contact Form -->
+        <div class="contact-form-card">
+          <h3>Send Us a Message</h3>
+          <p>Fill out the form below and we'll get back to you within 24 hours.</p>
+          <form id="contact-form">
+            <div class="form-group">
+              <label for="contact-name">Full Name</label>
+              <input type="text" id="contact-name" placeholder="Enter your full name" required>
+            </div>
+            <div class="form-group">
+              <label for="contact-email">Email Address</label>
+              <input type="email" id="contact-email" placeholder="Enter your email" required>
+            </div>
+            <div class="form-group">
+              <label for="contact-phone">Phone Number</label>
+              <input type="tel" id="contact-phone" placeholder="e.g. +233 24 123 4567">
+            </div>
+            <div class="form-group">
+              <label for="contact-subject">Subject</label>
+              <select id="contact-subject" required>
+                <option value="" disabled selected>Select a subject</option>
+                <option value="general">General Inquiry</option>
+                <option value="order">Order Support</option>
+                <option value="delivery">Delivery Issue</option>
+                <option value="product">Product Question</option>
+                <option value="partnership">Partnership / Wholesale</option>
+                <option value="feedback">Feedback</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="contact-message">Message</label>
+              <textarea id="contact-message" placeholder="Tell us how we can help you..." required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">
+              Send Message →
+            </button>
+          </form>
+        </div>
+
+        <!-- Contact Info -->
+        <div class="contact-info-card">
+          <div class="contact-info-item">
+            <div class="contact-info-icon">📍</div>
+            <div>
+              <h4>Visit Our Office</h4>
+              <p>24 Independence Avenue<br>Accra, Greater Accra Region<br>Ghana</p>
+            </div>
+          </div>
+
+          <div class="contact-info-item">
+            <div class="contact-info-icon">📞</div>
+            <div>
+              <h4>Call Us</h4>
+              <p><a href="tel:0256322653" style="color:var(--primary); font-weight:600; text-decoration:none;">0256322653</a><br><small style="color:var(--text-muted);">Available daily 7:00 AM – 8:00 PM</small></p>
+            </div>
+          </div>
+
+          <div class="contact-info-item">
+            <div class="contact-info-icon">💬</div>
+            <div>
+              <h4>WhatsApp Us</h4>
+              <p><a href="https://wa.me/233597118637" target="_blank" style="color:#2E7D32; font-weight:600; text-decoration:none;">0597118637</a><br><small style="color:var(--text-muted);">Instant chat & custom hamper inquiries</small></p>
+            </div>
+          </div>
+
+          <div class="contact-info-item">
+            <div class="contact-info-icon">✉️</div>
+            <div>
+              <h4>Email Us</h4>
+              <p><a href="mailto:dappahsonnia@gmail.com" style="color:var(--primary); font-weight:600; text-decoration:none;">dappahsonnia@gmail.com</a><br><small style="color:var(--text-muted);">24/7 customer support</small></p>
+            </div>
+          </div>
+
+          <div class="contact-info-item">
+            <div class="contact-info-icon">🕐</div>
+            <div>
+              <h4>Business Hours</h4>
+              <p>Monday – Friday: 7:00 AM – 8:00 PM<br>Saturday: 8:00 AM – 6:00 PM<br>Sunday: 9:00 AM – 3:00 PM</p>
+            </div>
+          </div>
+
+          <div class="contact-info-item">
+            <div class="contact-info-icon">💬</div>
+            <div>
+              <h4>Follow Us</h4>
+              <p>Stay connected on social media for deals, recipes, and updates.</p>
+              <div class="footer-social" style="margin-top: 10px;">
+                <a href="#" title="Facebook">📘</a>
+                <a href="#" title="Instagram">📷</a>
+                <a href="#" title="Twitter">🐦</a>
+                <a href="#" title="WhatsApp">💬</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="contact-map">
+            <div class="map-placeholder">🗺️</div>
+            <p class="mt-2" style="font-size: 0.85rem; color: var(--text-muted);">24 Independence Ave, Accra</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Section -->
+  <section class="section" style="background: var(--bg-alt);">
+    <div class="container">
+      <div class="section-header">
+        <h2>Frequently Asked Questions</h2>
+        <p>Quick answers to common questions</p>
+      </div>
+      <div class="values-grid" style="max-width: 900px; margin: 0 auto;">
+        <div class="value-card" style="text-align: left;">
+          <h4>🚚 How fast is delivery?</h4>
+          <p>We offer same-day delivery for orders placed before 2 PM within Accra. Next-day delivery is available for all other locations in Greater Accra.</p>
+        </div>
+        <div class="value-card" style="text-align: left;">
+          <h4>💳 What payment methods do you accept?</h4>
+          <p>We accept Mobile Money (MTN, Vodafone, AirtelTigo), bank transfer, and cash on delivery for your convenience.</p>
+        </div>
+        <div class="value-card" style="text-align: left;">
+          <h4>🔄 Can I return or exchange products?</h4>
+          <p>Yes! If you're not satisfied with the quality of any product, contact us within 24 hours of delivery for a full refund or exchange.</p>
+        </div>
+        <div class="value-card" style="text-align: left;">
+          <h4>📦 Is there a minimum order amount?</h4>
+          <p>No minimum order required! However, orders above GH₵ 200 qualify for free delivery within Accra.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-about">
+          <div class="footer-logo">SONIVIVA</div>
+          <div class="footer-slogan">Fresh Flavors, Delivered to Your Door</div>
+          <p>A brand of Rita Foods and Co. — bringing the finest foodstuffs to Ghanaian homes since 2024.</p>
+          <div class="footer-social">
+            <a href="#" title="Facebook">📘</a>
+            <a href="#" title="Instagram">📷</a>
+            <a href="#" title="Twitter">🐦</a>
+            <a href="#" title="WhatsApp">💬</a>
+          </div>
+        </div>
+        <div>
+          <h4>Quick Links</h4>
+          <ul class="footer-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="shop.html">Shop</a></li>
+            <li><a href="about.html">About Us</a></li>
+            <li><a href="contact.html">Contact</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Categories</h4>
+          <ul class="footer-links">
+            <li><a href="shop.html?category=Grains%20%26%20Cereals">Grains & Cereals</a></li>
+            <li><a href="shop.html?category=Fresh%20Produce">Fresh Produce</a></li>
+            <li><a href="shop.html?category=Spices%20%26%20Seasonings">Spices & Seasonings</a></li>
+            <li><a href="shop.html?category=Oils%20%26%20Condiments">Oils & Condiments</a></li>
+            <li><a href="shop.html?category=Beverages">Beverages</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Contact Us</h4>
+          <div class="footer-contact-item">
+            <span class="icon">📍</span>
+            <span>24 Independence Ave, Accra, Ghana</span>
+          </div>
+          <div class="footer-contact-item">
+            <span class="icon">📞</span>
+            <a href="tel:0256322653" style="color:inherit; text-decoration:none;">Call: 0256322653</a>
+          </div>
+          <div class="footer-contact-item">
+            <span class="icon">💬</span>
+            <a href="https://wa.me/233597118637" target="_blank" style="color:inherit; text-decoration:none;">WhatsApp: 0597118637</a>
+          </div>
+          <div class="footer-contact-item">
+            <span class="icon">✉️</span>
+            <a href="mailto:dappahsonnia@gmail.com" style="color:inherit; text-decoration:none;">dappahsonnia@gmail.com</a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 SONIVIVA by Rita Foods and Co. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Back to Top -->
+  <button class="back-to-top" aria-label="Back to top">↑</button>
+
+  <!-- Scripts -->
+  <script src="js/products.js"></script>
+  <script src="js/cart.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      initContactForm();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shop — SONIVIVA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar scrolled">
+    <div class="nav-container">
+      <a href="index.html" class="nav-logo">SONI<span>VIVA</span></a>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="shop.html" class="active">Shop</a></li>
+        <li><a href="hampers.html">Food Hampers</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+      <div class="nav-actions">
+        <a href="cart.html" class="cart-link" title="Shopping Cart">
+          <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0"/></svg>
+          <span class="cart-count hidden">0</span>
+        </a>
+      </div>
+      <button class="mobile-toggle" aria-label="Toggle menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Page Header -->
+  <section class="page-header">
+    <div class="container">
+      <h1>Our Products</h1>
+      <p>Browse our complete collection of premium foodstuffs</p>
+      <div class="breadcrumb">
+        <a href="index.html">Home</a>
+        <span>/</span>
+        <span class="current">Shop</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Shop Content -->
+  <section class="section">
+    <div class="container">
+
+      <!-- Toolbar -->
+      <div class="shop-toolbar">
+        <p id="results-count" class="results-count">Showing <strong>32</strong> of <strong>32</strong> products</p>
+        <div class="shop-search">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="shop-search" placeholder="Search products...">
+        </div>
+        <button class="filter-toggle">☰ Filters</button>
+        <div class="shop-sort">
+          <select id="sort-select">
+            <option value="default">Sort by: Default</option>
+            <option value="price-low">Price: Low to High</option>
+            <option value="price-high">Price: High to Low</option>
+            <option value="name-az">Name: A – Z</option>
+            <option value="name-za">Name: Z – A</option>
+            <option value="rating">Highest Rated</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="shop-container">
+        <!-- Sidebar Filters -->
+        <aside class="shop-sidebar">
+          <div class="filter-group">
+            <h4>Categories</h4>
+            <label class="filter-option">
+              <input type="checkbox" data-category="Grains & Cereals"> Grains & Cereals
+              <span class="count">6</span>
+            </label>
+            <label class="filter-option">
+              <input type="checkbox" data-category="Fresh Produce"> Fresh Produce
+              <span class="count">6</span>
+            </label>
+            <label class="filter-option">
+              <input type="checkbox" data-category="Spices & Seasonings"> Spices & Seasonings
+              <span class="count">6</span>
+            </label>
+            <label class="filter-option">
+              <input type="checkbox" data-category="Dairy & Eggs"> Dairy & Eggs
+              <span class="count">4</span>
+            </label>
+            <label class="filter-option">
+              <input type="checkbox" data-category="Oils & Condiments"> Oils & Condiments
+              <span class="count">6</span>
+            </label>
+            <label class="filter-option">
+              <input type="checkbox" data-category="Beverages"> Beverages
+              <span class="count">4</span>
+            </label>
+          </div>
+
+          <div class="filter-group">
+            <h4>Price Range</h4>
+            <select id="price-filter" style="width:100%; padding:10px 12px; border:1px solid var(--border); border-radius: var(--radius-sm); font-size:0.88rem; background: var(--bg); cursor:pointer;">
+              <option value="all">All Prices</option>
+              <option value="under-20">Under GH₵ 20</option>
+              <option value="20-50">GH₵ 20 – GH₵ 50</option>
+              <option value="50-100">GH₵ 50 – GH₵ 100</option>
+              <option value="over-100">Over GH₵ 100</option>
+            </select>
+          </div>
+        </aside>
+
+        <!-- Products Grid -->
+        <div>
+          <div class="products-grid" id="shop-products"></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Newsletter -->
+  <section class="newsletter">
+    <div class="container">
+      <div class="section-header">
+        <h2>Don't Miss a Deal</h2>
+        <p>Subscribe for exclusive offers, new arrivals, and seasonal specials.</p>
+      </div>
+      <form class="newsletter-form">
+        <input type="email" placeholder="Enter your email address" required>
+        <button type="submit" class="btn btn-accent">Subscribe</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-about">
+          <div class="footer-logo">SONIVIVA</div>
+          <div class="footer-slogan">Fresh Flavors, Delivered to Your Door</div>
+          <p>A brand of Rita Foods and Co. — bringing the finest foodstuffs to Ghanaian homes since 2024.</p>
+          <div class="footer-social">
+            <a href="#" title="Facebook">📘</a>
+            <a href="#" title="Instagram">📷</a>
+            <a href="#" title="Twitter">🐦</a>
+            <a href="#" title="WhatsApp">💬</a>
+          </div>
+        </div>
+        <div>
+          <h4>Quick Links</h4>
+          <ul class="footer-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="shop.html">Shop</a></li>
+            <li><a href="about.html">About Us</a></li>
+            <li><a href="contact.html">Contact</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Categories</h4>
+          <ul class="footer-links">
+            <li><a href="shop.html?category=Grains%20%26%20Cereals">Grains & Cereals</a></li>
+            <li><a href="shop.html?category=Fresh%20Produce">Fresh Produce</a></li>
+            <li><a href="shop.html?category=Spices%20%26%20Seasonings">Spices & Seasonings</a></li>
+            <li><a href="shop.html?category=Oils%20%26%20Condiments">Oils & Condiments</a></li>
+            <li><a href="shop.html?category=Beverages">Beverages</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Contact Us</h4>
+          <div class="footer-contact-item">
+            <span class="icon">📍</span>
+            <span>24 Independence Ave, Accra, Ghana</span>
+          </div>
+          <div class="footer-contact-item">
+            <span class="icon">📞</span>
+            <a href="tel:0256322653" style="color:inherit; text-decoration:none;">Call: 0256322653</a>
+          </div>
+          <div class="footer-contact-item">
+            <span class="icon">💬</span>
+            <a href="https://wa.me/233597118637" target="_blank" style="color:inherit; text-decoration:none;">WhatsApp: 0597118637</a>
+          </div>
+          <div class="footer-contact-item">
+            <span class="icon">✉️</span>
+            <a href="mailto:dappahsonnia@gmail.com" style="color:inherit; text-decoration:none;">dappahsonnia@gmail.com</a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 SONIVIVA by Rita Foods and Co. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Back to Top -->
+  <button class="back-to-top" aria-label="Back to top">↑</button>
+
+  <!-- Scripts -->
+  <script src="js/products.js"></script>
+  <script src="js/cart.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      initShopPage();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Food Hampers & Custom Gift Packages — SONIVIVA</title>
+  <meta name="description" content="Shop pre-curated food hampers with authentic Ghanaian staples and provisions, or build your own custom hamper with SONIVIVA.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    .hampers-hero {
+      background: linear-gradient(135deg, rgba(27, 94, 32, 0.95), rgba(46, 125, 50, 0.85)), url('https://images.unsplash.com/photo-1513558161293-cdaf765ed514?w=1400&fit=crop&auto=format&q=80') center/cover;
+      color: var(--white);
+      padding: 90px 20px 70px;
+      text-align: center;
+      margin-top: var(--nav-height);
+    }
+    .hampers-hero h1 {
+      font-size: 2.8rem;
+      margin-bottom: 16px;
+      color: #fff;
+    }
+    .hampers-hero p {
+      font-size: 1.15rem;
+      max-width: 720px;
+      margin: 0 auto 28px;
+      color: #E8F5E9;
+      line-height: 1.6;
+    }
+    .hero-buttons {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .hamper-showcase-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 30px;
+      margin-top: 36px;
+    }
+    .hamper-card-detailed {
+      background: var(--white);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-card);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: var(--transition);
+    }
+    .hamper-card-detailed:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-hover);
+    }
+    .hamper-card-img {
+      height: 220px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hamper-card-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .hamper-card-content {
+      padding: 24px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .hamper-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+    .hamper-card-header h3 {
+      font-size: 1.25rem;
+      color: var(--text);
+    }
+    .hamper-card-price {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--primary);
+    }
+    .hamper-desc {
+      font-size: 0.88rem;
+      color: var(--text-light);
+      margin-bottom: 18px;
+      line-height: 1.5;
+    }
+    .hamper-items-breakdown {
+      background: #FAFAFA;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      margin-bottom: 20px;
+      flex: 1;
+    }
+    .hamper-items-breakdown h4 {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--primary);
+      margin-bottom: 10px;
+    }
+    .hamper-items-breakdown ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px 12px;
+      font-size: 0.82rem;
+    }
+    .hamper-items-breakdown li {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text);
+    }
+    .custom-banner {
+      background: linear-gradient(135deg, #FFF8E1, #FFECB3);
+      border: 2px dashed var(--accent);
+      border-radius: var(--radius);
+      padding: 30px;
+      margin: 50px 0 30px;
+      text-align: center;
+    }
+    .custom-banner h2 {
+      font-size: 1.8rem;
+      color: #3E2723;
+      margin-bottom: 12px;
+    }
+    .custom-banner p {
+      font-size: 1rem;
+      color: #5D4037;
+      max-width: 780px;
+      margin: 0 auto 20px;
+      line-height: 1.6;
+    }
+    .selected-items-badge {
+      background: var(--primary);
+      color: #fff;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="nav-logo">SONI<span>VIVA</span></a>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="shop.html">Shop</a></li>
+        <li><a href="hampers.html" class="active">Food Hampers</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+      <div class="nav-actions">
+        <!-- Populated by auth.js -->
+      </div>
+      <button class="mobile-toggle" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <header class="hampers-hero">
+    <div class="container">
+      <span class="badge hamper-badge" style="margin-bottom: 16px;">Authentic Ghanaian Food Hampers</span>
+      <h1>Curated Hampers & Gift Packages</h1>
+      <p>Thoughtfully stocked with wholesome foodstuffs, premium grains, and pantry provisions. Choose from our ready-made hampers or pick and choose to build your own customized basket!</p>
+      <div class="hero-buttons">
+        <a href="#premade-hampers" class="btn btn-primary btn-lg">Browse Ready Hampers</a>
+        <a href="#hamper-builder" class="btn btn-outline btn-lg" style="color:#fff; border-color:#fff;">🧺 Build Custom Hamper</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Pre-made Hampers Section -->
+  <section class="section" id="premade-hampers">
+    <div class="container">
+      <div class="section-header text-center">
+        <span class="category-tag">Ready to Deliver</span>
+        <h2>Pre-Stocked Food Hampers</h2>
+        <p>Expertly curated food baskets packed with everyday staples, proteins, and seasonings. Delivered right to your doorstep or directly to family and loved ones.</p>
+      </div>
+
+      <div class="hamper-showcase-grid" id="hampers-grid">
+        <!-- Rendered by JavaScript below with complete real-life contents -->
+      </div>
+
+      <!-- Customization Banner -->
+      <div class="custom-banner" id="custom-banner-section">
+        <h2>💡 Want to add more items or design your own hamper?</h2>
+        <p>No two families or occasions are the same! You can choose an existing hamper and add extra provisions, or assemble your own custom food basket using our interactive builder below.</p>
+        <a href="#hamper-builder" class="btn btn-primary btn-lg">Start Building Custom Hamper</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Interactive Hamper Builder Section -->
+  <section class="section" id="hamper-builder" style="background: #FAFAF7; border-top: 1px solid var(--border);">
+    <div class="container">
+      <div class="section-header">
+        <span class="category-tag">Personalized Gifting</span>
+        <h2>Build Your Own Custom Hamper</h2>
+        <p>Tick the foodstuffs and provisions you'd like in your hamper. We assemble everything in a sturdy food basket or gift crate and deliver with your personalized message.</p>
+      </div>
+
+      <div class="hamper-builder-grid">
+        <!-- Left: Product categories selector -->
+        <div class="hamper-builder-items" id="hamper-selection-container">
+          <!-- Populated dynamically with foodstuffs and provisions -->
+        </div>
+
+        <!-- Right: Real-time Hamper Summary Sidebar -->
+        <div class="custom-hamper-summary">
+          <div class="checkout-summary-card">
+            <h4>
+              🧺 Your Custom Hamper
+              <span class="selected-items-badge" id="custom-item-count">0 items</span>
+            </h4>
+            <div id="custom-selected-items-list" style="max-height: 280px; overflow-y: auto; margin-bottom: 16px;">
+              <p style="color: var(--text-muted); font-size: 0.88rem; text-align: center; padding: 20px 0;">No items selected yet. Choose items on the left to start building your hamper!</p>
+            </div>
+            
+            <div class="form-group" style="margin-bottom: 16px;">
+              <label style="font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 4px;">Custom Gift Note / Packaging Instructions:</label>
+              <textarea id="hamper-custom-note" rows="2" placeholder="e.g., Happy Birthday Mom! Please package with a gold festive ribbon." style="width:100%; font-size: 0.85rem; padding: 8px; border: 1px solid var(--border); border-radius: var(--radius-sm);"></textarea>
+            </div>
+
+            <div class="checkout-summary-row">
+              <span>Hamper Foodstuffs Total:</span>
+              <strong id="custom-hamper-subtotal">GH₵ 0.00</strong>
+            </div>
+            <div class="checkout-summary-row">
+              <span>Packaging & Basket:</span>
+              <span style="color:#2E7D32; font-weight: 600;">FREE</span>
+            </div>
+            <div class="checkout-summary-row total">
+              <span>Total Price:</span>
+              <span id="custom-hamper-total">GH₵ 0.00</span>
+            </div>
+
+            <button class="btn btn-primary btn-lg" id="add-custom-hamper-btn" onclick="addCustomHamperToCart()" style="width: 100%; margin-top: 16px;" disabled>
+              Add Custom Hamper to Cart
+            </button>
+            <p style="font-size: 0.78rem; color: var(--text-muted); text-align: center; margin-top: 10px;">
+              🔒 Guaranteed fresh packaging & safe door-to-door delivery
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-about">
+          <div class="footer-logo">SONIVIVA</div>
+          <div class="footer-slogan">Fresh Flavors, Delivered to Your Door</div>
+          <p>A brand of Rita Foods and Co. — providing premium Ghanaian foodstuffs, fresh produce, and tailored hampers across Ghana.</p>
+        </div>
+        <div>
+          <h4>Quick Links</h4>
+          <ul class="footer-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="shop.html">Shop Products</a></li>
+            <li><a href="hampers.html">Food Hampers</a></li>
+            <li><a href="about.html">About Us</a></li>
+            <li><a href="contact.html">Contact</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Contact & Gifting</h4>
+          <div class="footer-contact-item"><span class="icon">📍</span><span>24 Independence Ave, Accra, Ghana</span></div>
+          <div class="footer-contact-item"><span class="icon">📞</span><a href="tel:0256322653" style="color:inherit; text-decoration:none;">Call: 0256322653</a></div>
+          <div class="footer-contact-item"><span class="icon">💬</span><a href="https://wa.me/233597118637" target="_blank" style="color:inherit; text-decoration:none;">WhatsApp: 0597118637</a></div>
+          <div class="footer-contact-item"><span class="icon">✉️</span><a href="mailto:dappahsonnia@gmail.com" style="color:inherit; text-decoration:none;">dappahsonnia@gmail.com</a></div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 SONIVIVA by Rita Foods and Co. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/products.js"></script>
+  <script src="js/cart.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    // ─── Real-life Pre-made Hampers Data with Detailed Item Lists ───
+    const detailedHampers = [
+      {
+        id: 45,
+        name: 'Essential Kitchen Hamper',
+        price: 299.00,
+        image: 'https://images.unsplash.com/photo-1513558161293-cdaf765ed514?w=500&h=320&fit=crop&auto=format&q=80',
+        description: 'The ultimate kitchen starter package. Contains essential Ghanaian ingredients to prepare jollof, stews, soups, and breakfasts for a busy home.',
+        items: [
+          { name: 'Royal Feast Basmati Rice', qty: '5kg bag', emoji: '🍚' },
+          { name: 'Pure Red Palm Oil (Zomi)', qty: '1 Litre bottle', emoji: '🟠' },
+          { name: 'Fresh Vine Tomatoes', qty: '1 kg', emoji: '🍅' },
+          { name: 'Fresh Red Onions', qty: '1 kg', emoji: '🧅' },
+          { name: 'Farm-Fresh Eggs', qty: 'Crate of 30', emoji: '🥚' },
+          { name: 'Gino Concentrated Tomato Paste', qty: '400g tin', emoji: '🥫' },
+          { name: 'Aromatic Curry Powder', qty: '100g tin', emoji: '🟡' },
+          { name: 'White Granulated Sugar', qty: '2kg bag', emoji: '🍬' },
+          { name: 'Fine Iodated Salt', qty: '1kg pack', emoji: '🧂' },
+          { name: 'Maggi Seasoning Cubes', qty: 'Box of 100', emoji: '🟫' }
+        ]
+      },
+      {
+        id: 46,
+        name: 'Family Care Package',
+        price: 499.00,
+        image: 'https://images.unsplash.com/photo-1607344645866-009c320b63e0?w=500&h=320&fit=crop&auto=format&q=80',
+        description: 'A generous family-sized hamper packed with substantial carbohydrates, proteins, seasonings, and provisions. Feeds a family of 4 to 6 comfortably.',
+        items: [
+          { name: 'Premium Aged Basmati Rice', qty: '5kg bag', emoji: '🍚' },
+          { name: 'All-Purpose Wheat Flour', qty: '2kg pack', emoji: '🌾' },
+          { name: 'Vine-Ripened Tomatoes', qty: '1 kg', emoji: '🍅' },
+          { name: 'Scotch Bonnet & Pepper Mix', qty: '1 kg', emoji: '🌶️' },
+          { name: 'Sweet Ripe Plantain', qty: '5 fingers', emoji: '🍌' },
+          { name: 'Premium Red Onions', qty: '1 kg', emoji: '🧅' },
+          { name: 'Sun-Dried Shrimp', qty: '200g pack', emoji: '🦐' },
+          { name: 'Free-Range Farm Eggs', qty: 'Crate of 30', emoji: '🥚' },
+          { name: 'Pure Red Palm Oil', qty: '1 Litre bottle', emoji: '🟠' },
+          { name: 'Concentrated Tomato Paste', qty: '400g tin', emoji: '🥫' },
+          { name: 'Golden Tree Cocoa Powder', qty: '250g tin', emoji: '☕' },
+          { name: 'Indomie Chicken Noodles', qty: 'Carton of 40', emoji: '🍜' },
+          { name: 'Peak Evaporated Milk', qty: '12 tins', emoji: '🥛' },
+          { name: 'Granulated Sugar', qty: '2kg bag', emoji: '🍬' },
+          { name: 'Iodated Table Salt', qty: '1kg pack', emoji: '🧂' }
+        ]
+      },
+      {
+        id: 47,
+        name: 'Festive Celebration Hamper',
+        price: 799.00,
+        image: 'https://images.unsplash.com/photo-1549488344-cbb6c34cf08b?w=500&h=320&fit=crop&auto=format&q=80',
+        description: 'Our flagship luxury hamper for Christmas, Easter, weddings, and corporate appreciation. Includes top-shelf staples, canned delicacies, and treats.',
+        items: [
+          { name: 'Royal Feast Basmati Rice', qty: '5kg bag', emoji: '🍚' },
+          { name: 'Fragrant Jasmine Rice', qty: '5kg bag', emoji: '🍚' },
+          { name: 'Whole Grain Rolled Oats', qty: '500g pack', emoji: '🥣' },
+          { name: 'Juicy Vine Tomatoes', qty: '1 kg', emoji: '🍅' },
+          { name: 'Sweet Ripe Plantain', qty: '7 fingers', emoji: '🍌' },
+          { name: 'Sun-Dried Shrimp', qty: '200g pack', emoji: '🦐' },
+          { name: 'SONIVIVA Signature Spice Jar', qty: '150g jar', emoji: '✨' },
+          { name: 'Fresh Whole Milk', qty: '1 Litre', emoji: '🥛' },
+          { name: 'Free-Range Eggs', qty: 'Crate of 30', emoji: '🥚' },
+          { name: 'Unsalted Pure Butter', qty: '250g block', emoji: '🧈' },
+          { name: 'Pure Red Palm Oil', qty: '1 Litre', emoji: '🟠' },
+          { name: 'Virgin Coconut Oil', qty: '500ml', emoji: '🥥' },
+          { name: 'Sobolo Hibiscus & Spice Mix', qty: '200g pack', emoji: '🌺' },
+          { name: 'Pure Ghanaian Cocoa Powder', qty: '250g tin', emoji: '☕' },
+          { name: 'Indomie Chicken Noodles', qty: 'Carton of 40', emoji: '🍜' },
+          { name: 'Titus Sardines in Oil', qty: '10 tins', emoji: '🐟' },
+          { name: 'Exeter Corned Beef', qty: '6 tins', emoji: '🥩' },
+          { name: 'Crispy Cabin Biscuits', qty: '6 packs', emoji: '🍪' },
+          { name: 'Bournvita Malt Drink', qty: '400g tin', emoji: '☕' },
+          { name: 'Refined Granulated Sugar', qty: '2kg bag', emoji: '🍬' }
+        ]
+      },
+      {
+        id: 48,
+        name: 'Student Starter Hamper',
+        price: 199.00,
+        image: 'https://images.unsplash.com/photo-1604719312566-8912e9227c6a?w=500&h=320&fit=crop&auto=format&q=80',
+        description: 'Designed specifically for students and young professionals. High convenience, nutritious, and shelf-stable food essentials to survive the semester.',
+        items: [
+          { name: 'Local Volta Brown Rice', qty: '2kg bag', emoji: '🌾' },
+          { name: 'Indomie Instant Noodles', qty: 'Carton of 40', emoji: '🍜' },
+          { name: 'Titus Sardines', qty: '10 tins', emoji: '🐟' },
+          { name: 'Granulated White Sugar', qty: '2kg bag', emoji: '🍬' },
+          { name: 'Iodated Table Salt', qty: '1kg pack', emoji: '🧂' },
+          { name: 'Antioxidant Green Tea', qty: '50 bags', emoji: '🍵' },
+          { name: 'Peak Evaporated Milk', qty: '12 tins', emoji: '🥛' },
+          { name: 'Groundnut Cooking Oil', qty: '1 Litre bottle', emoji: '🥜' }
+        ]
+      }
+    ];
+
+    // ─── Render Pre-made Hampers ───
+    function renderHampers() {
+      const grid = document.getElementById('hampers-grid');
+      if (!grid) return;
+
+      grid.innerHTML = detailedHampers.map(h => `
+        <div class="hamper-card-detailed" id="hamper-${h.id}">
+          <div class="hamper-card-img">
+            <img src="${h.image}" alt="${h.name}">
+            <span class="product-badge hamper-badge" style="position:absolute; top:12px; left:12px;">${h.items.length} Food Items</span>
+          </div>
+          <div class="hamper-card-content">
+            <div class="hamper-card-header">
+              <h3>${h.name}</h3>
+              <span class="hamper-card-price">GH₵ ${h.price.toFixed(2)}</span>
+            </div>
+            <p class="hamper-desc">${h.description}</p>
+            
+            <div class="hamper-items-breakdown">
+              <h4>📦 Exact Contents Included:</h4>
+              <ul>
+                ${h.items.map(it => `<li><span>${it.emoji}</span> <strong>${it.name}</strong> (${it.qty})</li>`).join('')}
+              </ul>
+            </div>
+
+            <div class="hamper-customize-notice" style="margin-top:0; margin-bottom:18px;">
+              <strong>💡 Want to add more items?</strong><br>
+              Order this base hamper, then freely add any extra produce, oils, or provisions from our shop to your cart!
+            </div>
+
+            <div style="display:flex; gap:10px; margin-top:auto;">
+              <button class="btn btn-primary" onclick="addToCart(${h.id})" style="flex:1;">
+                🛒 Add to Cart
+              </button>
+              <a href="product.html?id=${h.id}" class="btn btn-outline">
+                Details
+              </a>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // ─── Interactive Hamper Builder ───
+    let customSelectedItems = new Map(); // id -> product object
+
+    function renderHamperBuilder() {
+      const container = document.getElementById('hamper-selection-container');
+      if (!container) return;
+
+      // Group available products by category (excluding ready-made hampers)
+      const nonHampers = products.filter(p => !p.isHamper && p.category !== 'Hampers');
+      const cats = [...new Set(nonHampers.map(p => p.category))];
+
+      container.innerHTML = cats.map(cat => {
+        const catProds = nonHampers.filter(p => p.category === cat);
+        return `
+          <div class="hamper-builder-card hamper-builder-category">
+            <h3>${cat}</h3>
+            <div class="hamper-item-select-grid">
+              ${catProds.map(p => `
+                <label class="hamper-select-box" id="select-box-${p.id}">
+                  <input type="checkbox" onchange="toggleCustomItem(${p.id}, this.checked)">
+                  <div class="hamper-select-info">
+                    <span class="hamper-select-name">${p.emoji} ${p.name}</span>
+                    <span class="hamper-select-unit">${p.unit}</span>
+                    <span class="hamper-select-price">GH₵ ${p.price.toFixed(2)}</span>
+                  </div>
+                </label>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function toggleCustomItem(productId, isChecked) {
+      const prod = getProductById(productId);
+      if (!prod) return;
+
+      const box = document.getElementById(`select-box-${productId}`);
+      if (isChecked) {
+        customSelectedItems.set(productId, prod);
+        box?.classList.add('selected');
+      } else {
+        customSelectedItems.delete(productId);
+        box?.classList.remove('selected');
+      }
+      updateCustomSummary();
+    }
+
+    function updateCustomSummary() {
+      const listEl = document.getElementById('custom-selected-items-list');
+      const countEl = document.getElementById('custom-item-count');
+      const subtotalEl = document.getElementById('custom-hamper-subtotal');
+      const totalEl = document.getElementById('custom-hamper-total');
+      const btn = document.getElementById('add-custom-hamper-btn');
+
+      const items = Array.from(customSelectedItems.values());
+      countEl.textContent = `${items.length} item${items.length === 1 ? '' : 's'}`;
+
+      if (items.length === 0) {
+        listEl.innerHTML = '<p style="color: var(--text-muted); font-size: 0.88rem; text-align: center; padding: 20px 0;">No items selected yet. Choose items on the left to start building your hamper!</p>';
+        subtotalEl.textContent = 'GH₵ 0.00';
+        totalEl.textContent = 'GH₵ 0.00';
+        btn.disabled = true;
+        return;
+      }
+
+      let subtotal = 0;
+      listEl.innerHTML = items.map(p => {
+        subtotal += p.price;
+        return `
+          <div style="display:flex; justify-content:space-between; align-items:center; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 0.85rem;">
+            <span>${p.emoji} ${p.name} <small style="color:var(--text-muted);">(${p.unit})</small></span>
+            <strong>GH₵ ${p.price.toFixed(2)}</strong>
+          </div>
+        `;
+      }).join('');
+
+      subtotalEl.textContent = `GH₵ ${subtotal.toFixed(2)}`;
+      totalEl.textContent = `GH₵ ${subtotal.toFixed(2)}`;
+      btn.disabled = false;
+    }
+
+    function addCustomHamperToCart() {
+      if (customSelectedItems.size === 0) {
+        showToast('Please select at least one item for your custom hamper!', 'error');
+        return;
+      }
+
+      // Add each chosen item directly to cart, plus store the custom note
+      const note = document.getElementById('hamper-custom-note').value;
+      let count = 0;
+      customSelectedItems.forEach(prod => {
+        addToCart(prod.id);
+        count++;
+      });
+
+      showToast(`Custom Hamper with ${count} items added to your cart! 🧺`, 'success');
+      
+      // Clear selection
+      customSelectedItems.clear();
+      document.querySelectorAll('.hamper-select-box input[type="checkbox"]').forEach(cb => cb.checked = false);
+      document.querySelectorAll('.hamper-select-box').forEach(b => b.classList.remove('selected'));
+      document.getElementById('hamper-custom-note').value = '';
+      updateCustomSummary();
+
+      setTimeout(() => {
+        window.location.href = 'cart.html';
+      }, 1200);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      renderHampers();
+      renderHamperBuilder();
+    });
+  </script>
+</body>
+</html>

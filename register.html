@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register — SONIVIVA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="nav-logo">SONI<span>VIVA</span></a>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="shop.html">Shop</a></li>
+        <li><a href="hampers.html">Food Hampers</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+      <div class="nav-actions"></div>
+      <button class="mobile-toggle" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <div class="auth-page">
+    <div class="auth-card">
+      <div class="auth-logo">SONI<span>VIVA</span></div>
+      <h2>Create an Account</h2>
+      <p class="auth-subtitle">Join us to shop for premium foodstuffs</p>
+      
+      <button type="button" class="btn btn-google" id="google-signup-btn" onclick="handleGoogleSignUp()">
+        <svg class="google-icon" width="20" height="20" viewBox="0 0 24 24">
+          <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/>
+          <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"/>
+          <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+          <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+        </svg>
+        Sign up with Google
+      </button>
+
+      <div class="auth-divider">
+        <span>or register with email</span>
+      </div>
+      
+      <form id="register-form">
+        <div class="form-group">
+          <label for="name">Full Name</label>
+          <input type="text" id="name" name="name" required placeholder="John Doe">
+        </div>
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" name="email" required placeholder="john@example.com">
+        </div>
+        <div class="form-group">
+          <label for="phone">Phone Number</label>
+          <input type="tel" id="phone" name="phone" required placeholder="+233 XX XXX XXXX">
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" required placeholder="Create a strong password">
+          <div class="password-strength">
+            <div class="password-strength-fill" id="strength-fill" style="width: 0%; background: #D32F2F;"></div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="confirm_password">Confirm Password</label>
+          <input type="password" id="confirm_password" name="confirm_password" required placeholder="Confirm your password">
+          <div id="password-error" class="form-error" style="display: none;">Passwords do not match</div>
+        </div>
+        
+        <button type="submit" class="btn btn-primary" style="margin-top: 10px;">Register</button>
+      </form>
+      
+      <div class="auth-footer">
+        Already have an account? <a href="login.html">Login here</a>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-bottom" style="text-align: center;">
+        <p>&copy; 2026 SONIVIVA by Rita Foods and Co. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/products.js"></script>
+  <script src="js/cart.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    // Password strength meter
+    const pwdInput = document.getElementById('password');
+    const strengthFill = document.getElementById('strength-fill');
+    
+    pwdInput.addEventListener('input', () => {
+      const val = pwdInput.value;
+      let strength = 0;
+      if (val.length >= 8) strength += 25;
+      if (/[A-Z]/.test(val)) strength += 25;
+      if (/[0-9]/.test(val)) strength += 25;
+      if (/[^A-Za-z0-9]/.test(val)) strength += 25;
+      
+      strengthFill.style.width = strength + '%';
+      
+      if (strength <= 25) strengthFill.style.background = '#D32F2F'; // Red
+      else if (strength <= 50) strengthFill.style.background = '#F57C00'; // Orange
+      else if (strength <= 75) strengthFill.style.background = '#FBC02D'; // Yellow
+      else strengthFill.style.background = '#388E3C'; // Green
+    });
+
+    document.getElementById('register-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const pwd = document.getElementById('password').value;
+      const confirmPwd = document.getElementById('confirm_password').value;
+      const errorEl = document.getElementById('password-error');
+      
+      if (pwd !== confirmPwd) {
+        errorEl.style.display = 'block';
+        return;
+      }
+      errorEl.style.display = 'none';
+      
+      const name = document.getElementById('name').value;
+      const email = document.getElementById('email').value;
+      const phone = document.getElementById('phone').value;
+      const btn = e.target.querySelector('button');
+      
+      try {
+        btn.disabled = true;
+        btn.textContent = 'Registering...';
+        
+        const response = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, phone, password: pwd })
+        });
+        
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}));
+          throw new Error(data.message || 'Registration failed.');
+        }
+        
+        showToast('Registration successful! Redirecting to login...', 'success');
+        
+        setTimeout(() => {
+          window.location.href = 'login.html';
+        }, 2000);
+      } catch (err) {
+        showToast(err.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Register';
+      }
+    });
+  </script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script>
+    async function handleGoogleSignUp() {
+      // Prompt for Google email
+      const enteredEmail = prompt('Enter your Google email address to sign up with Google:\n(e.g., dappahsonnia@gmail.com)', 'dappahsonnia@gmail.com');
+      if (!enteredEmail) return;
+
+      try {
+        showToast('Connecting with Google...', 'info');
+        const res = await fetch('/api/auth/google', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: enteredEmail.trim(),
+            name: enteredEmail.split('@')[0]
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Google sign-up failed');
+
+        localStorage.setItem('soniviva_token', data.token);
+        localStorage.setItem('soniviva_user', JSON.stringify(data.user));
+        showToast(`Account ready! Welcome, ${data.user.name}!`, 'success');
+
+        setTimeout(() => {
+          if (data.user.role === 'admin') {
+            window.location.href = '/admin/';
+          } else {
+            window.location.href = 'index.html';
+          }
+        }, 800);
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+  </script>
+</body>
+</html>

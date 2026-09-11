@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard — SONIVIVA</title>
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="sidebar-header"><h2>SONI<span>VIVA</span></h2><small>Admin Dashboard</small></div>
+    <nav class="sidebar-nav">
+      <a href="./" class="active"><span class="icon">📊</span> Dashboard</a>
+      <a href="products.html"><span class="icon">📦</span> Products</a>
+      <a href="categories.html"><span class="icon">📂</span> Categories</a>
+      <a href="orders.html"><span class="icon">🛒</span> Orders</a>
+      <a href="users.html"><span class="icon">👥</span> Users</a>
+      <div class="divider"></div>
+      <a href="/"><span class="icon">🏪</span> Back to Store</a>
+    </nav>
+    <div class="sidebar-footer"><a href="#" onclick="logout()">🚪 Logout</a></div>
+  </aside>
+  <main class="main-content">
+    <div class="top-bar">
+      <h1>Dashboard Overview</h1>
+      <div class="top-bar-actions"><span class="admin-name" id="admin-name"></span><button class="btn-logout" onclick="logout()">Logout</button></div>
+    </div>
+    <div class="content">
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-icon" style="background:#E8F5E9;color:#2E7D32;">💰</div><div class="stat-value" id="stat-revenue">—</div><div class="stat-label">Total Revenue</div></div>
+        <div class="stat-card"><div class="stat-icon" style="background:#E3F2FD;color:#1565C0;">📋</div><div class="stat-value" id="stat-orders">—</div><div class="stat-label">Total Orders</div></div>
+        <div class="stat-card"><div class="stat-icon" style="background:#F3E5F5;color:#6A1B9A;">👥</div><div class="stat-value" id="stat-users">—</div><div class="stat-label">Total Users</div></div>
+        <div class="stat-card"><div class="stat-icon" style="background:#FFF3E0;color:#E65100;">📦</div><div class="stat-value" id="stat-products">—</div><div class="stat-label">Total Products</div></div>
+      </div>
+      <div class="table-card">
+        <div class="table-header"><h3>Recent Orders</h3></div>
+        <table><thead><tr><th>Order #</th><th>Customer</th><th>Total</th><th>Status</th><th>Date</th></tr></thead><tbody id="recent-orders-body"><tr><td colspan="5" class="loading">Loading...</td></tr></tbody></table>
+      </div>
+    </div>
+  </main>
+  <script src="js/admin.js"></script>
+  <script>loadDashboard();</script>
+</body>
+</html>

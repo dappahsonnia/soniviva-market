@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Orders — SONIVIVA Admin</title>
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="sidebar-header"><h2>SONI<span>VIVA</span></h2><small>Admin Dashboard</small></div>
+    <nav class="sidebar-nav">
+      <a href="./"><span class="icon">📊</span> Dashboard</a>
+      <a href="products.html"><span class="icon">📦</span> Products</a>
+      <a href="categories.html"><span class="icon">📂</span> Categories</a>
+      <a href="orders.html" class="active"><span class="icon">🛒</span> Orders</a>
+      <a href="users.html"><span class="icon">👥</span> Users</a>
+      <div class="divider"></div>
+      <a href="/"><span class="icon">🏪</span> Back to Store</a>
+    </nav>
+    <div class="sidebar-footer"><a href="#" onclick="logout()">🚪 Logout</a></div>
+  </aside>
+  <main class="main-content">
+    <div class="top-bar"><h1>Orders</h1><div class="top-bar-actions"><span class="admin-name" id="admin-name"></span><button class="btn-logout" onclick="logout()">Logout</button></div></div>
+    <div class="content">
+      <div class="status-tabs">
+        <button class="status-tab active" onclick="filterOrders('all')">All</button>
+        <button class="status-tab" onclick="filterOrders('pending')">Pending</button>
+        <button class="status-tab" onclick="filterOrders('confirmed')">Confirmed</button>
+        <button class="status-tab" onclick="filterOrders('processing')">Processing</button>
+        <button class="status-tab" onclick="filterOrders('shipped')">Shipped</button>
+        <button class="status-tab" onclick="filterOrders('delivered')">Delivered</button>
+        <button class="status-tab" onclick="filterOrders('cancelled')">Cancelled</button>
+      </div>
+      <div class="table-card">
+        <table><thead><tr><th>Order #</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th><th>Date</th><th>Update</th></tr></thead><tbody id="orders-body"><tr><td colspan="7" class="loading">Loading...</td></tr></tbody></table>
+      </div>
+    </div>
+  </main>
+  <script src="js/admin.js"></script>
+  <script>loadOrders();</script>
+</body>
+</html>

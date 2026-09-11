@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Profile — SONIVIVA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="nav-logo">SONI<span>VIVA</span></a>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="shop.html">Shop</a></li>
+        <li><a href="hampers.html">Food Hampers</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+      <div class="nav-actions"></div>
+      <button class="mobile-toggle" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <div style="padding-top: 120px; min-height: 80vh; background: var(--bg); padding-bottom: 80px;">
+    <div class="container">
+      <div style="margin-bottom: 30px;">
+        <a href="index.html" style="color: var(--primary);">Home</a> &gt; <span style="color: var(--text-muted);">My Profile</span>
+      </div>
+      
+      <div class="profile-grid">
+        <!-- Profile Info Form -->
+        <div class="profile-card">
+          <h3>Profile Information</h3>
+          <form id="profile-form">
+            <div class="form-group" style="margin-bottom: 16px;">
+              <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 6px;">Full Name</label>
+              <input type="text" id="profile-name" required style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: var(--radius-sm);">
+            </div>
+            <div class="form-group" style="margin-bottom: 16px;">
+              <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 6px;">Email (Readonly)</label>
+              <input type="email" id="profile-email" readonly style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: #f5f5f5;">
+            </div>
+            <div class="form-group" style="margin-bottom: 16px;">
+              <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 6px;">Phone Number</label>
+              <input type="tel" id="profile-phone" required style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: var(--radius-sm);">
+            </div>
+            <div class="form-group" style="margin-bottom: 16px;">
+              <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 6px;">Delivery Address</label>
+              <input type="text" id="profile-address" style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: var(--radius-sm);">
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+              <div class="form-group" style="margin-bottom: 16px;">
+                <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 6px;">City</label>
+                <input type="text" id="profile-city" style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: var(--radius-sm);">
+              </div>
+              <div class="form-group" style="margin-bottom: 16px;">
+                <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 6px;">Region</label>
+                <select id="profile-region" style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: var(--radius-sm);">
+                  <option value="">Select Region</option>
+                  <option value="Greater Accra">Greater Accra</option>
+                  <option value="Ashanti">Ashanti</option>
+                  <option value="Central">Central</option>
+                  <option value="Eastern">Eastern</option>
+                  <option value="Western">Western</option>
+                </select>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary" style="margin-top: 10px;">Save Profile</button>
+          </form>
+        </div>
+        
+        <!-- Change Password Form -->
+        <div class="profile-card">
+          <h3>Change Password</h3>
+          <form id="password-form">
+            <div class="form-group" style="margin-bottom: 16px;">
+              <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 6px;">Current Password</label>
+              <input type="password" id="current-password" required style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: var(--radius-sm);">
+            </div>
+            <div class="form-group" style="margin-bottom: 16px;">
+              <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 6px;">New Password</label>
+              <input type="password" id="new-password" required style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: var(--radius-sm);">
+            </div>
+            <div class="form-group" style="margin-bottom: 16px;">
+              <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 6px;">Confirm New Password</label>
+              <input type="password" id="confirm-new-password" required style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: var(--radius-sm);">
+            </div>
+            <button type="submit" class="btn btn-outline" style="margin-top: 10px;">Update Password</button>
+          </form>
+        </div>
+      </div>
+      
+      <!-- Order History -->
+      <div class="profile-card" style="margin-top: 30px;">
+        <h3>Order History</h3>
+        <div style="overflow-x: auto;">
+          <table style="width: 100%; border-collapse: collapse; text-align: left; min-width: 600px;">
+            <thead>
+              <tr style="border-bottom: 2px solid var(--border);">
+                <th style="padding: 12px; font-weight: 600;">Order #</th>
+                <th style="padding: 12px; font-weight: 600;">Date</th>
+                <th style="padding: 12px; font-weight: 600;">Items</th>
+                <th style="padding: 12px; font-weight: 600;">Total</th>
+                <th style="padding: 12px; font-weight: 600;">Status</th>
+                <th style="padding: 12px; font-weight: 600;">Action</th>
+              </tr>
+            </thead>
+            <tbody id="orders-tbody">
+              <tr>
+                <td colspan="6" style="padding: 20px; text-align: center; color: var(--text-muted);">Loading orders...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-bottom" style="text-align: center;">
+        <p>&copy; 2026 SONIVIVA by Rita Foods and Co. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/products.js"></script>
+  <script src="js/cart.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    requireAuth(); // Ensure user is logged in
+    
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Fetch Profile
+      try {
+        const res = await authFetch('/api/user/profile');
+        if (res.ok) {
+          const profile = await res.json();
+          document.getElementById('profile-name').value = profile.name || '';
+          document.getElementById('profile-email').value = profile.email || '';
+          document.getElementById('profile-phone').value = profile.phone || '';
+          document.getElementById('profile-address').value = profile.address || '';
+          document.getElementById('profile-city').value = profile.city || '';
+          document.getElementById('profile-region').value = profile.region || '';
+        }
+      } catch (e) {
+        console.error('Error fetching profile', e);
+      }
+      
+      // Fetch Orders
+      try {
+        const res = await authFetch('/api/user/orders');
+        const tbody = document.getElementById('orders-tbody');
+        if (res.ok) {
+          const orders = await res.json();
+          if (orders.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="padding: 20px; text-align: center; color: var(--text-muted);">You have no orders yet.</td></tr>';
+          } else {
+            tbody.innerHTML = orders.map(o => `
+              <tr style="border-bottom: 1px solid var(--border);">
+                <td style="padding: 16px 12px; font-weight: 600;">${o.id}</td>
+                <td style="padding: 16px 12px;">${new Date(o.date).toLocaleDateString()}</td>
+                <td style="padding: 16px 12px;">${o.itemsCount} items</td>
+                <td style="padding: 16px 12px; font-weight: 600; color: var(--primary);">GH₵ ${o.total.toFixed(2)}</td>
+                <td style="padding: 16px 12px;"><span class="order-status ${o.status.toLowerCase()}">${o.status}</span></td>
+                <td style="padding: 16px 12px;"><button class="btn btn-sm btn-outline" onclick="alert('View details for ${o.id}')">View</button></td>
+              </tr>
+            `).join('');
+          }
+        } else {
+          tbody.innerHTML = '<tr><td colspan="6" style="padding: 20px; text-align: center; color: var(--text-muted);">Failed to load orders.</td></tr>';
+        }
+      } catch (e) {
+        console.error('Error fetching orders', e);
+      }
+    });
+    
+    // Save Profile
+    document.getElementById('profile-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = e.target.querySelector('button');
+      btn.disabled = true;
+      btn.textContent = 'Saving...';
+      
+      const payload = {
+        name: document.getElementById('profile-name').value,
+        phone: document.getElementById('profile-phone').value,
+        address: document.getElementById('profile-address').value,
+        city: document.getElementById('profile-city').value,
+        region: document.getElementById('profile-region').value
+      };
+      
+      try {
+        const res = await authFetch('/api/user/profile', {
+          method: 'PUT',
+          body: JSON.stringify(payload)
+        });
+        
+        if (!res.ok) throw new Error('Failed to update profile');
+        
+        const data = await res.json();
+        // Update local user data
+        if (data.user) {
+          localStorage.setItem('soniviva_user', JSON.stringify(data.user));
+          updateAuthNav();
+        }
+        
+        showToast('Profile updated successfully!', 'success');
+      } catch (err) {
+        showToast(err.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Save Profile';
+      }
+    });
+    
+    // Change Password
+    document.getElementById('password-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const currentPassword = document.getElementById('current-password').value;
+      const newPassword = document.getElementById('new-password').value;
+      const confirmNew = document.getElementById('confirm-new-password').value;
+      
+      if (newPassword !== confirmNew) {
+        showToast('New passwords do not match.', 'error');
+        return;
+      }
+      
+      const btn = e.target.querySelector('button');
+      btn.disabled = true;
+      btn.textContent = 'Updating...';
+      
+      try {
+        const res = await authFetch('/api/auth/reset-password', {
+          method: 'POST',
+          body: JSON.stringify({ currentPassword, newPassword })
+        });
+        
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data.message || 'Failed to update password');
+        }
+        
+        showToast('Password updated successfully!', 'success');
+        e.target.reset();
+      } catch (err) {
+        showToast(err.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Update Password';
+      }
+    });
+  </script>
+</body>
+</html>

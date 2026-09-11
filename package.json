@@ -1,0 +1,24 @@
+{
+  "name": "soniviva-ecommerce",
+  "version": "1.0.0",
+  "description": "SONIVIVA — Fresh Flavors, Delivered to Your Door. E-commerce platform by Rita Foods and Co.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "keywords": ["ecommerce", "food", "ghana", "soniviva"],
+  "author": "Rita Foods and Co.",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.21.0",
+    "sql.js": "^1.11.0",
+    "jsonwebtoken": "^9.0.2",
+    "bcryptjs": "^2.4.3",
+    "express-validator": "^7.2.0",
+    "multer": "^1.4.5-lts.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "cookie-parser": "^1.4.6"
+  }
+}

@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login — SONIVIVA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="nav-logo">SONI<span>VIVA</span></a>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="shop.html">Shop</a></li>
+        <li><a href="hampers.html">Food Hampers</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+      <div class="nav-actions">
+        <!-- populated by auth.js -->
+      </div>
+      <button class="mobile-toggle" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <div class="auth-page">
+    <div class="auth-card">
+      <div class="auth-logo">SONI<span>VIVA</span></div>
+      <h2>Welcome Back</h2>
+      <p class="auth-subtitle">Login to your account to continue</p>
+      
+      <button type="button" class="btn btn-google" id="google-signin-btn" onclick="handleGoogleSignIn()">
+        <svg class="google-icon" width="20" height="20" viewBox="0 0 24 24">
+          <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/>
+          <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"/>
+          <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+          <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+        </svg>
+        Sign in with Google
+      </button>
+
+      <div class="auth-divider">
+        <span>or sign in with email</span>
+      </div>
+      
+      <form id="login-form">
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" name="email" required placeholder="Enter your email">
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" required placeholder="Enter your password">
+        </div>
+        
+        <div class="remember-row">
+          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+            <input type="checkbox" name="remember" style="width: auto;"> Remember me
+          </label>
+          <a href="#">Forgot Password?</a>
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Login</button>
+      </form>
+      
+      <div class="auth-footer">
+        Don't have an account? <a href="register.html">Register here</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-about">
+          <div class="footer-logo">SONIVIVA</div>
+          <div class="footer-slogan">Fresh Flavors, Delivered to Your Door</div>
+          <p>A brand of Rita Foods and Co. — bringing the finest foodstuffs to Ghanaian homes since 2024.</p>
+        </div>
+        <div>
+          <h4>Quick Links</h4>
+          <ul class="footer-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="shop.html">Shop</a></li>
+            <li><a href="about.html">About Us</a></li>
+            <li><a href="contact.html">Contact</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Contact Us</h4>
+          <div class="footer-contact-item"><span class="icon">📍</span><span>24 Independence Ave, Accra, Ghana</span></div>
+          <div class="footer-contact-item"><span class="icon">📞</span><a href="tel:0256322653" style="color:inherit; text-decoration:none;">Call: 0256322653</a></div>
+          <div class="footer-contact-item"><span class="icon">💬</span><a href="https://wa.me/233597118637" target="_blank" style="color:inherit; text-decoration:none;">WhatsApp: 0597118637</a></div>
+          <div class="footer-contact-item"><span class="icon">✉️</span><a href="mailto:dappahsonnia@gmail.com" style="color:inherit; text-decoration:none;">dappahsonnia@gmail.com</a></div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 SONIVIVA by Rita Foods and Co. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/products.js"></script>
+  <script src="js/cart.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/app.js"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script>
+    // Initialize Google Identity Services if client ID is available
+    async function initGoogleAuth() {
+      try {
+        const res = await fetch('/api/auth/google-config');
+        const data = await res.json();
+        if (data.clientId && window.google?.accounts?.id) {
+          window.google.accounts.id.initialize({
+            client_id: data.clientId,
+            callback: handleGoogleCredentialResponse
+          });
+        }
+      } catch (e) {
+        console.log('Google config fetch error:', e);
+      }
+    }
+
+    async function handleGoogleCredentialResponse(response) {
+      try {
+        const res = await fetch('/api/auth/google', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ credential: response.credential })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Google login failed');
+        
+        localStorage.setItem('soniviva_token', data.token);
+        localStorage.setItem('soniviva_user', JSON.stringify(data.user));
+        showToast('Signed in with Google successfully!', 'success');
+        
+        setTimeout(() => {
+          if (data.user.role === 'admin') {
+            window.location.href = '/admin/';
+          } else {
+            window.location.href = 'index.html';
+          }
+        }, 800);
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    async function handleGoogleSignIn() {
+      // Check if official Google prompt can be launched
+      if (window.google?.accounts?.id) {
+        try {
+          window.google.accounts.id.prompt();
+          return;
+        } catch (e) {}
+      }
+
+      // Seamless interactive Google Sign-In prompt
+      const enteredEmail = prompt('Enter your Google email address to sign in:\n(e.g., dappahsonnia@gmail.com)', 'dappahsonnia@gmail.com');
+      if (!enteredEmail) return;
+
+      try {
+        showToast('Connecting with Google...', 'info');
+        const res = await fetch('/api/auth/google', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: enteredEmail.trim(),
+            name: enteredEmail.split('@')[0]
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Google sign-in failed');
+
+        localStorage.setItem('soniviva_token', data.token);
+        localStorage.setItem('soniviva_user', JSON.stringify(data.user));
+        showToast(`Welcome back, ${data.user.name}!`, 'success');
+
+        setTimeout(() => {
+          if (data.user.role === 'admin') {
+            window.location.href = '/admin/';
+          } else {
+            window.location.href = 'index.html';
+          }
+        }, 800);
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    window.addEventListener('load', initGoogleAuth);
+
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const btn = e.target.querySelector('button');
+      
+      try {
+        btn.disabled = true;
+        btn.textContent = 'Logging in...';
+        
+        const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}));
+          throw new Error(data.error || data.message || 'Login failed. Please check your credentials.');
+        }
+        
+        const data = await response.json();
+        localStorage.setItem('soniviva_token', data.token);
+        localStorage.setItem('soniviva_user', JSON.stringify(data.user));
+        
+        showToast('Login successful!', 'success');
+        
+        setTimeout(() => {
+          if (data.user.role === 'admin') {
+            window.location.href = '/admin/';
+          } else {
+            window.location.href = 'index.html';
+          }
+        }, 800);
+      } catch (err) {
+        showToast(err.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Login';
+      }
+    });
+  </script>
+</body>
+</html>

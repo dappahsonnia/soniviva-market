@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout — SONIVIVA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar scrolled">
+    <div class="nav-container">
+      <a href="index.html" class="nav-logo">SONI<span>VIVA</span></a>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="shop.html">Shop</a></li>
+        <li><a href="hampers.html">Food Hampers</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+      <div class="nav-actions">
+        <a href="cart.html" class="cart-link" title="Shopping Cart">
+          <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0"/></svg>
+          <span class="cart-count hidden">0</span>
+        </a>
+      </div>
+      <button class="mobile-toggle" aria-label="Toggle menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Page Header -->
+  <section class="page-header" style="padding: 100px 0 40px;">
+    <div class="container">
+      <h1>Checkout</h1>
+      <div class="breadcrumb">
+        <a href="index.html">Home</a>
+        <span>/</span>
+        <a href="cart.html">Cart</a>
+        <span>/</span>
+        <span class="current">Checkout</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Step Progress Indicator -->
+  <section class="checkout-progress-section">
+    <div class="container">
+      <div class="checkout-progress">
+        <div class="progress-bar">
+          <div class="progress-fill"></div>
+        </div>
+        <div class="step-indicators">
+          <div class="step-item active" data-step="1">
+            <div class="step-circle">1</div>
+            <span class="step-label">Shipping</span>
+          </div>
+          <div class="step-item" data-step="2">
+            <div class="step-circle">2</div>
+            <span class="step-label">Payment</span>
+          </div>
+          <div class="step-item" data-step="3">
+            <div class="step-circle">3</div>
+            <span class="step-label">Review</span>
+          </div>
+          <div class="step-item" data-step="4">
+            <div class="step-circle">4</div>
+            <span class="step-label">Confirmation</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Checkout Content -->
+  <section class="section checkout-section" style="padding-top: 30px;">
+    <div class="container">
+      <div class="checkout-layout">
+
+        <!-- Main Form Area -->
+        <div class="checkout-main">
+
+          <!-- ═══ STEP 1: Shipping ═══ -->
+          <div class="checkout-step active" id="step-1">
+            <div class="checkout-card">
+              <h3>📍 Shipping Information</h3>
+              <p class="checkout-card-desc">Where should we deliver your order?</p>
+
+              <div class="checkout-form-grid">
+                <div class="form-group">
+                  <label for="ship-name">Full Name <span class="required">*</span></label>
+                  <input type="text" id="ship-name" placeholder="e.g. Kwame Mensah" required>
+                </div>
+                <div class="form-group">
+                  <label for="ship-email">Email Address <span class="required">*</span></label>
+                  <input type="email" id="ship-email" placeholder="e.g. kwame@email.com" required>
+                </div>
+                <div class="form-group">
+                  <label for="ship-phone">Phone Number <span class="required">*</span></label>
+                  <input type="tel" id="ship-phone" placeholder="e.g. 024 123 4567" required>
+                </div>
+                <div class="form-group">
+                  <label for="ship-gps">Digital Address (GPS)</label>
+                  <input type="text" id="ship-gps" placeholder="e.g. GA-123-4567">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="ship-address">Street Address <span class="required">*</span></label>
+                <input type="text" id="ship-address" placeholder="e.g. 24 Independence Avenue" required>
+              </div>
+
+              <div class="form-group">
+                <label for="ship-address2">Apartment, Suite, Landmark (optional)</label>
+                <input type="text" id="ship-address2" placeholder="e.g. Apt 4B, Near Total filling station">
+              </div>
+
+              <div class="checkout-form-grid">
+                <div class="form-group">
+                  <label for="ship-city">City / Town <span class="required">*</span></label>
+                  <input type="text" id="ship-city" placeholder="e.g. Accra" required>
+                </div>
+                <div class="form-group">
+                  <label for="ship-region">Region <span class="required">*</span></label>
+                  <select id="ship-region" required>
+                    <option value="" disabled selected>Select region</option>
+                    <!-- Populated by JS -->
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="ship-notes">Delivery Notes (optional)</label>
+                <textarea id="ship-notes" placeholder="Any special instructions for delivery..." rows="3"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- ═══ STEP 2: Payment ═══ -->
+          <div class="checkout-step" id="step-2">
+            <div class="checkout-card">
+              <h3>💳 Payment Method</h3>
+              <p class="checkout-card-desc">Choose how you'd like to pay for your order</p>
+
+              <div class="payment-options">
+                <!-- Mobile Money -->
+                <label class="payment-option" onclick="selectPaymentMethod('momo')">
+                  <input type="radio" name="payment-method" value="momo">
+                  <div class="payment-option-content">
+                    <div class="payment-icon">📱</div>
+                    <div class="payment-details">
+                      <span class="payment-label">Mobile Money</span>
+                      <span class="payment-desc">Pay with MTN MoMo, Vodafone Cash, or AirtelTigo Money</span>
+                    </div>
+                    <div class="payment-check">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                    </div>
+                  </div>
+                </label>
+
+                <!-- MoMo Details (shown when MoMo selected) -->
+                <div class="payment-sub-form" id="momo-details" style="display: none;">
+                  <div class="checkout-form-grid">
+                    <div class="form-group">
+                      <label for="momo-provider">Provider <span class="required">*</span></label>
+                      <select id="momo-provider">
+                        <option value="" disabled selected>Select provider</option>
+                        <option value="MTN Mobile Money">MTN Mobile Money</option>
+                        <option value="Vodafone Cash">Vodafone Cash</option>
+                        <option value="AirtelTigo Money">AirtelTigo Money</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label for="momo-phone">MoMo Number <span class="required">*</span></label>
+                      <input type="tel" id="momo-phone" placeholder="e.g. 024 123 4567">
+                    </div>
+                  </div>
+                  <p class="payment-info-note">💡 You will receive a prompt on your phone to approve the payment.</p>
+                </div>
+
+                <!-- Bank Transfer -->
+                <label class="payment-option" onclick="selectPaymentMethod('bank')">
+                  <input type="radio" name="payment-method" value="bank">
+                  <div class="payment-option-content">
+                    <div class="payment-icon">🏦</div>
+                    <div class="payment-details">
+                      <span class="payment-label">Bank Transfer</span>
+                      <span class="payment-desc">Transfer directly to our bank account</span>
+                    </div>
+                    <div class="payment-check">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                    </div>
+                  </div>
+                </label>
+
+                <!-- Cash on Delivery -->
+                <label class="payment-option" onclick="selectPaymentMethod('cod')">
+                  <input type="radio" name="payment-method" value="cod">
+                  <div class="payment-option-content">
+                    <div class="payment-icon">💵</div>
+                    <div class="payment-details">
+                      <span class="payment-label">Cash on Delivery</span>
+                      <span class="payment-desc">Pay with cash when your order is delivered</span>
+                    </div>
+                    <div class="payment-check">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                    </div>
+                  </div>
+                </label>
+              </div>
+
+              <div class="secure-note">
+                🔒 Your payment information is secure and encrypted.
+              </div>
+            </div>
+          </div>
+
+          <!-- ═══ STEP 3: Review ═══ -->
+          <div class="checkout-step" id="step-3">
+            <div class="checkout-card">
+              <h3>📋 Review Your Order</h3>
+              <p class="checkout-card-desc">Please review your details before placing the order</p>
+
+              <div id="review-shipping"></div>
+              <div id="review-payment" class="mt-3"></div>
+              <div id="review-items" class="mt-3"></div>
+            </div>
+          </div>
+
+          <!-- ═══ STEP 4: Confirmation ═══ -->
+          <div class="checkout-step" id="step-4">
+            <div class="checkout-card confirmation-card" id="confirmation-content">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <!-- Navigation Buttons -->
+          <div class="checkout-nav">
+            <button class="btn btn-outline" id="prev-btn" onclick="prevStep()" style="visibility: hidden;">
+              ← Back
+            </button>
+            <button class="btn btn-primary btn-lg" id="next-btn" onclick="nextStep()">
+              Continue →
+            </button>
+          </div>
+
+        </div>
+
+        <!-- Order Summary Sidebar -->
+        <aside class="checkout-sidebar">
+          <div class="checkout-summary-card">
+            <h4>Order Summary</h4>
+            <div class="checkout-items-list" id="checkout-items">
+              <!-- Populated by JS -->
+            </div>
+            <div id="checkout-summary-totals">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <div class="checkout-guarantee">
+            <div class="guarantee-item">
+              <span>🛡️</span>
+              <span>Secure Checkout</span>
+            </div>
+            <div class="guarantee-item">
+              <span>🚚</span>
+              <span>Fast Delivery</span>
+            </div>
+            <div class="guarantee-item">
+              <span>🔄</span>
+              <span>Easy Returns</span>
+            </div>
+          </div>
+        </aside>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-about">
+          <div class="footer-logo">SONIVIVA</div>
+          <div class="footer-slogan">Fresh Flavors, Delivered to Your Door</div>
+          <p>A brand of Rita Foods and Co. — bringing the finest foodstuffs to Ghanaian homes since 2024.</p>
+        </div>
+        <div>
+          <h4>Quick Links</h4>
+          <ul class="footer-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="shop.html">Shop</a></li>
+            <li><a href="about.html">About Us</a></li>
+            <li><a href="contact.html">Contact</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Categories</h4>
+          <ul class="footer-links">
+            <li><a href="shop.html?category=Grains%20%26%20Cereals">Grains & Cereals</a></li>
+            <li><a href="shop.html?category=Fresh%20Produce">Fresh Produce</a></li>
+            <li><a href="shop.html?category=Spices%20%26%20Seasonings">Spices & Seasonings</a></li>
+            <li><a href="shop.html?category=Oils%20%26%20Condiments">Oils & Condiments</a></li>
+            <li><a href="shop.html?category=Beverages">Beverages</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Contact Us</h4>
+          <div class="footer-contact-item">
+            <span class="icon">📍</span>
+            <span>24 Independence Ave, Accra, Ghana</span>
+          </div>
+          <div class="footer-contact-item">
+            <span class="icon">📞</span>
+            <a href="tel:0256322653" style="color:inherit; text-decoration:none;">Call: 0256322653</a>
+          </div>
+          <div class="footer-contact-item">
+            <span class="icon">💬</span>
+            <a href="https://wa.me/233597118637" target="_blank" style="color:inherit; text-decoration:none;">WhatsApp: 0597118637</a>
+          </div>
+          <div class="footer-contact-item">
+            <span class="icon">✉️</span>
+            <a href="mailto:dappahsonnia@gmail.com" style="color:inherit; text-decoration:none;">dappahsonnia@gmail.com</a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 SONIVIVA by Rita Foods and Co. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Back to Top -->
+  <button class="back-to-top" aria-label="Back to top">↑</button>
+
+  <!-- Scripts -->
+  <script src="js/products.js"></script>
+  <script src="js/cart.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/checkout.js"></script>
+</body>
+</html>
