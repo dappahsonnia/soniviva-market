@@ -109,7 +109,33 @@ class Database {
 // ─── Initialize database ───
 async function initDatabase() {
   if (db) return db;
-  const SQL = await initSqlJs();
+
+  let wasmBinary = null;
+  const localWasm = path.join(__dirname, 'sql-wasm.wasm');
+  const nmWasm = path.join(__dirname, '..', 'node_modules', 'sql.js', 'dist', 'sql-wasm.wasm');
+
+  if (fs.existsSync(localWasm)) {
+    try {
+      wasmBinary = fs.readFileSync(localWasm);
+    } catch (e) {}
+  } else if (fs.existsSync(nmWasm)) {
+    try {
+      wasmBinary = fs.readFileSync(nmWasm);
+    } catch (e) {}
+  }
+
+  const sqlOptions = {
+    locateFile: file => {
+      if (fs.existsSync(localWasm)) return localWasm;
+      if (fs.existsSync(nmWasm)) return nmWasm;
+      return file;
+    }
+  };
+  if (wasmBinary) {
+    sqlOptions.wasmBinary = wasmBinary;
+  }
+
+  const SQL = await initSqlJs(sqlOptions);
 
   const prebuiltPath = path.join(__dirname, 'soniviva.db');
 

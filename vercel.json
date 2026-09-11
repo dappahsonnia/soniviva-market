@@ -8,6 +8,7 @@
       "config": {
         "includeFiles": [
           "db/**",
+          "node_modules/sql.js/dist/**",
           "uploads/**",
           "*.html",
           "css/**",

@@ -30,8 +30,15 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// Database readiness check for all requests
-app.use(async (req, res, next) => {
+// ─── Static files (served immediately without DB dependency) ───
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use(express.static(__dirname, {
+  extensions: ['html'],
+  index: 'index.html'
+}));
+
+// Database readiness check for /api requests
+app.use('/api', async (req, res, next) => {
   try {
     await ensureDb();
     next();
@@ -39,13 +46,6 @@ app.use(async (req, res, next) => {
     res.status(500).json({ error: 'Database service unavailable', details: err.message });
   }
 });
-
-// ─── Static files ───
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-app.use(express.static(__dirname, {
-  extensions: ['html'],
-  index: 'index.html'
-}));
 
 // ─── API Routes ───
 app.use('/api/auth', require('./routes/auth'));
