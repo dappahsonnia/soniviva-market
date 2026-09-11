@@ -115,9 +115,44 @@ router.post('/reset-password', (req, res) => {
 
 // GET /api/auth/google-config
 router.get('/google-config', (req, res) => {
-  res.json({
-    clientId: process.env.GOOGLE_CLIENT_ID || ''
-  });
+  try {
+    const db = getDb();
+    const row = db.prepare("SELECT value FROM settings WHERE key = 'google_client_id'").get();
+    const clientId = (row && row.value) ? row.value : (process.env.GOOGLE_CLIENT_ID || '');
+    res.json({ clientId });
+  } catch (err) {
+    res.json({ clientId: process.env.GOOGLE_CLIENT_ID || '' });
+  }
+});
+
+// POST /api/auth/setup-google-client — Configure Google Client ID (Admin only)
+router.post('/setup-google-client', (req, res) => {
+  try {
+    const { clientId, adminPassword } = req.body;
+    if (!clientId || !clientId.trim()) {
+      return res.status(400).json({ error: 'Google Client ID is required.' });
+    }
+    const cleanId = clientId.trim();
+    if (!cleanId.includes('.apps.googleusercontent.com')) {
+      return res.status(400).json({ error: 'Invalid Google Client ID. It must end with .apps.googleusercontent.com' });
+    }
+
+    const db = getDb();
+    const adminUser = db.prepare("SELECT * FROM users WHERE email = 'dappahsonnia@gmail.com'").get();
+    if (!adminUser || !bcrypt.compareSync(adminPassword || '', adminUser.password_hash)) {
+      return res.status(401).json({ error: 'Invalid administrator password.' });
+    }
+
+    db.prepare(`
+      INSERT INTO settings (key, value) VALUES ('google_client_id', ?)
+      ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = datetime('now')
+    `).run(cleanId);
+
+    res.json({ message: 'Google Client ID configured successfully! Google Sign-In is now active.', clientId: cleanId });
+  } catch (err) {
+    console.error('Setup Google client error:', err);
+    res.status(500).json({ error: 'Failed to configure Google Client ID.' });
+  }
 });
 
 // POST /api/auth/google — Sign in or Sign up with Google
@@ -151,7 +186,26 @@ router.post('/google', async (req, res) => {
       }
     }
 
-    // Case 2: Client sent direct Google profile
+    // Case 2: Client sent an OAuth2 access_token (from Google OAuth2 token client with prompt: 'select_account')
+    if (!email && req.body.access_token) {
+      try {
+        const userInfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+          headers: { Authorization: `Bearer ${req.body.access_token}` }
+        });
+        if (userInfoRes.ok) {
+          const payload = await userInfoRes.json();
+          email = payload.email;
+          name = payload.name || payload.given_name || (email ? email.split('@')[0] : 'User');
+          picture = payload.picture || '';
+        } else {
+          console.warn('Google userinfo fetch returned status:', userInfoRes.status);
+        }
+      } catch (tokenErr) {
+        console.warn('Google userinfo fetch failed:', tokenErr.message);
+      }
+    }
+
+    // Case 3: Client sent direct Google profile
     if (!email && req.body.email) {
       email = req.body.email;
       name = req.body.name || email.split('@')[0];

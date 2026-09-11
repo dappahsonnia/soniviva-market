@@ -121,4 +121,30 @@ router.delete('/users/:id', (req, res) => {
     res.json({ message: 'User deleted' }); } catch (err) { res.status(500).json({ error: 'Failed' }); }
 });
 
+// Settings
+router.get('/settings', (req, res) => {
+  try {
+    const db = getDb();
+    const rows = db.prepare('SELECT key, value FROM settings').all();
+    const map = {};
+    rows.forEach(r => map[r.key] = r.value);
+    map.google_client_id = map.google_client_id || process.env.GOOGLE_CLIENT_ID || '';
+    res.json(map);
+  } catch (err) { res.status(500).json({ error: 'Failed to fetch settings' }); }
+});
+
+router.put('/settings', (req, res) => {
+  try {
+    const db = getDb();
+    const { google_client_id } = req.body;
+    if (typeof google_client_id === 'string') {
+      db.prepare(`
+        INSERT INTO settings (key, value) VALUES ('google_client_id', ?)
+        ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = datetime('now')
+      `).run(google_client_id.trim());
+    }
+    res.json({ message: 'Settings saved successfully' });
+  } catch (err) { res.status(500).json({ error: 'Failed to save settings' }); }
+});
+
 module.exports = router;

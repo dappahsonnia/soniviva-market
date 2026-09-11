@@ -144,6 +144,7 @@ async function initDatabase() {
     try {
       const fileBuffer = fs.readFileSync(DB_PATH);
       db = new Database(new SQL.Database(fileBuffer));
+      createTables();
       console.log('📦 Loaded existing database from', DB_PATH);
     } catch (e) {
       console.warn('Could not read existing database, creating fresh:', e.message);
@@ -155,6 +156,7 @@ async function initDatabase() {
     try {
       const fileBuffer = fs.readFileSync(prebuiltPath);
       db = new Database(new SQL.Database(fileBuffer));
+      createTables();
       console.log('📦 Loaded prebuilt database from', prebuiltPath);
       // Try to copy to writable DB_PATH for subsequent operations
       try {
@@ -274,6 +276,12 @@ function createTables() {
       quantity INTEGER NOT NULL DEFAULT 1,
       unit_price REAL NOT NULL DEFAULT 0,
       total REAL NOT NULL DEFAULT 0
+    );
+
+    CREATE TABLE IF NOT EXISTS settings (
+      key TEXT PRIMARY KEY,
+      value TEXT,
+      updated_at DATETIME DEFAULT (datetime('now'))
     );
   `);
 }
