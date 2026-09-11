@@ -35,9 +35,13 @@ router.post('/register', (req, res) => {
       return res.status(409).json({ error: 'An account with this email already exists' });
     }
 
-    const userId = result.lastInsertRowid;
+    const hash = bcrypt.hashSync(password, 12);
     const cleanEmail = email.toLowerCase().trim();
     const cleanName = name.trim();
+
+    const result = db.prepare('INSERT INTO users (name, email, phone, password_hash, role) VALUES (?, ?, ?, ?, ?)').run(cleanName, cleanEmail, phone || '', hash, 'user');
+
+    const userId = result.lastInsertRowid;
 
     const token = jwt.sign(
       { id: userId, email: cleanEmail, role: 'user', name: cleanName },
