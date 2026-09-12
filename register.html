@@ -52,22 +52,23 @@
       <form id="register-form">
         <div class="form-group">
           <label for="name">Full Name</label>
-          <input type="text" id="name" name="name" required placeholder="John Doe">
+          <input type="text" id="name" name="name" required placeholder="e.g. Ama Mensah">
         </div>
         <div class="form-group">
           <label for="email">Email Address</label>
-          <input type="email" id="email" name="email" required placeholder="john@example.com">
+          <input type="email" id="email" name="email" required placeholder="e.g. ama@example.com">
         </div>
         <div class="form-group">
-          <label for="phone">Phone Number</label>
-          <input type="tel" id="phone" name="phone" required placeholder="+233 XX XXX XXXX">
+          <label for="phone">Phone Number <span style="color:#999; font-weight:400;">(optional)</span></label>
+          <input type="tel" id="phone" name="phone" placeholder="+233 XX XXX XXXX">
         </div>
         <div class="form-group">
           <label for="password">Password</label>
-          <input type="password" id="password" name="password" required placeholder="Create a strong password">
+          <input type="password" id="password" name="password" required placeholder="Create a strong password" minlength="8">
           <div class="password-strength">
             <div class="password-strength-fill" id="strength-fill" style="width: 0%; background: #D32F2F;"></div>
           </div>
+          <div id="password-hint" style="font-size:0.78rem; color:#999; margin-top:4px;">Min 8 characters, 1 uppercase, 1 number</div>
         </div>
         <div class="form-group">
           <label for="confirm_password">Confirm Password</label>
@@ -97,9 +98,15 @@
   <script src="js/auth.js"></script>
   <script src="js/app.js"></script>
   <script>
+    // Redirect already logged-in users to homepage
+    if (isLoggedIn()) {
+      window.location.href = 'index.html';
+    }
+
     // Password strength meter
     const pwdInput = document.getElementById('password');
     const strengthFill = document.getElementById('strength-fill');
+    const passwordHint = document.getElementById('password-hint');
     
     pwdInput.addEventListener('input', () => {
       const val = pwdInput.value;
@@ -111,33 +118,47 @@
       
       strengthFill.style.width = strength + '%';
       
-      if (strength <= 25) strengthFill.style.background = '#D32F2F'; // Red
-      else if (strength <= 50) strengthFill.style.background = '#F57C00'; // Orange
-      else if (strength <= 75) strengthFill.style.background = '#FBC02D'; // Yellow
-      else strengthFill.style.background = '#388E3C'; // Green
+      if (strength <= 25) { strengthFill.style.background = '#D32F2F'; passwordHint.textContent = 'Weak — add uppercase, numbers, symbols'; }
+      else if (strength <= 50) { strengthFill.style.background = '#F57C00'; passwordHint.textContent = 'Fair — keep going!'; }
+      else if (strength <= 75) { strengthFill.style.background = '#FBC02D'; passwordHint.textContent = 'Good — add a special character for best security'; }
+      else { strengthFill.style.background = '#388E3C'; passwordHint.textContent = 'Strong password ✓'; }
+
+      if (!val) passwordHint.textContent = 'Min 8 characters, 1 uppercase, 1 number';
     });
 
+    // Live password match check
+    const confirmPwdInput = document.getElementById('confirm_password');
+    const passwordError = document.getElementById('password-error');
+
+    confirmPwdInput.addEventListener('input', () => {
+      if (confirmPwdInput.value && confirmPwdInput.value !== pwdInput.value) {
+        passwordError.style.display = 'block';
+      } else {
+        passwordError.style.display = 'none';
+      }
+    });
+
+    // Registration form handler
     document.getElementById('register-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       
       const pwd = document.getElementById('password').value;
       const confirmPwd = document.getElementById('confirm_password').value;
-      const errorEl = document.getElementById('password-error');
       
       if (pwd !== confirmPwd) {
-        errorEl.style.display = 'block';
+        passwordError.style.display = 'block';
         return;
       }
-      errorEl.style.display = 'none';
+      passwordError.style.display = 'none';
       
       const name = document.getElementById('name').value;
       const email = document.getElementById('email').value;
       const phone = document.getElementById('phone').value;
-      const btn = e.target.querySelector('button');
+      const btn = e.target.querySelector('button[type="submit"]');
       
       try {
         btn.disabled = true;
-        btn.textContent = 'Registering...';
+        btn.textContent = 'Creating account...';
         
         const response = await fetch('/api/auth/register', {
           method: 'POST',
@@ -155,7 +176,7 @@
           localStorage.setItem('soniviva_user', JSON.stringify(data.user));
         }
 
-        showToast(`Registration successful! Welcome to Soniviva, ${name}!`, 'success');
+        showToast(`Welcome to Soniviva, ${name}! 🎉`, 'success');
 
         setTimeout(() => {
           window.location.href = 'index.html';
@@ -189,7 +210,6 @@
     function setupGoogleClients() {
       if (!googleClientId || !window.google?.accounts) return;
 
-      // 1. Initialize Google Identity Services (One Tap & Credential)
       if (window.google.accounts.id) {
         try {
           window.google.accounts.id.initialize({
@@ -198,7 +218,6 @@
             auto_select: false
           });
 
-          // Mount official Google button
           const container = document.getElementById('google-btn-container');
           if (container) {
             container.style.display = 'flex';
@@ -218,8 +237,6 @@
         }
       }
 
-      // 2. Initialize Google OAuth 2.0 Token Client with prompt: 'select_account'
-      // This forces Google's native popup to list all Google accounts on the user's device!
       if (window.google.accounts.oauth2) {
         try {
           googleTokenClient = window.google.accounts.oauth2.initTokenClient({
@@ -236,7 +253,6 @@
 
     function handleGoogleSignUp() {
       if (googleTokenClient) {
-        // Opens Google's native Account Chooser popup so user chooses their account
         googleTokenClient.requestAccessToken({ prompt: 'select_account' });
         return;
       }
@@ -246,10 +262,9 @@
         return;
       }
 
-      showToast('Google Sign-Up is being connected. In the meantime, please complete registration using the form below.', 'info');
+      showToast('Google Sign-Up is being set up. Please register using the form below.', 'info');
     }
 
-    // Handles response from Google OAuth2 Token Client (with account selection)
     async function handleGoogleOAuthResponse(tokenResponse) {
       if (tokenResponse.error) {
         if (tokenResponse.error !== 'popup_closed_by_user') {
@@ -258,7 +273,7 @@
         return;
       }
 
-      showToast('Creating your customer account with Google...', 'info');
+      showToast('Creating your account with Google...', 'info');
       try {
         const res = await fetch('/api/auth/google', {
           method: 'POST',
@@ -270,7 +285,7 @@
 
         localStorage.setItem('soniviva_token', data.token);
         localStorage.setItem('soniviva_user', JSON.stringify(data.user));
-        showToast(`Account created! Welcome, ${data.user.name}!`, 'success');
+        showToast(`Welcome, ${data.user.name}! 🎉`, 'success');
 
         setTimeout(() => {
           window.location.href = 'index.html';
@@ -280,9 +295,8 @@
       }
     }
 
-    // Handles response from Google Identity Services Credential (One Tap / standard button)
     async function handleGoogleCredentialResponse(response) {
-      showToast('Creating your customer account with Google...', 'info');
+      showToast('Creating your account with Google...', 'info');
       try {
         const res = await fetch('/api/auth/google', {
           method: 'POST',
@@ -294,7 +308,7 @@
 
         localStorage.setItem('soniviva_token', data.token);
         localStorage.setItem('soniviva_user', JSON.stringify(data.user));
-        showToast(`Account created! Welcome, ${data.user.name}!`, 'success');
+        showToast(`Welcome, ${data.user.name}! 🎉`, 'success');
 
         setTimeout(() => {
           window.location.href = 'index.html';

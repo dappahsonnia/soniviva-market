@@ -187,28 +187,40 @@ function showToast(message, type = 'success') {
   if (!container) {
     container = document.createElement('div');
     container.className = 'toast-container';
+    container.style.cssText = 'position:fixed;top:24px;right:24px;z-index:99999;display:flex;flex-direction:column;gap:10px;pointer-events:none;';
     document.body.appendChild(container);
   }
 
+  const icons = { success: '✓', error: '✕', info: 'ℹ' };
+  const colors = {
+    success: { bg: '#E8F5E9', border: '#43A047', icon: '#2E7D32', text: '#1B5E20' },
+    error:   { bg: '#FFEBEE', border: '#E53935', icon: '#C62828', text: '#B71C1C' },
+    info:    { bg: '#E3F2FD', border: '#1E88E5', icon: '#1565C0', text: '#0D47A1' }
+  };
+  const c = colors[type] || colors.info;
+  const icon = icons[type] || icons.info;
+
   const toast = document.createElement('div');
-  toast.className = `toast ${type}`;
+  toast.style.cssText = `display:flex;align-items:center;gap:10px;padding:14px 20px;border-radius:10px;background:${c.bg};border:1px solid ${c.border};color:${c.text};font-size:0.92rem;font-family:'Inter',sans-serif;font-weight:500;box-shadow:0 4px 16px rgba(0,0,0,0.12);pointer-events:auto;transform:translateX(120%);transition:transform 0.35s cubic-bezier(0.4,0,0.2,1),opacity 0.35s;opacity:0;max-width:380px;`;
   toast.innerHTML = `
-    <span class="toast-icon">${type === 'success' ? '✓' : '✕'}</span>
+    <span style="font-size:1.15rem;font-weight:700;color:${c.icon};flex-shrink:0;">${icon}</span>
     <span>${message}</span>
   `;
 
   container.appendChild(toast);
 
-  // Trigger animation
+  // Trigger slide-in animation
   requestAnimationFrame(() => {
-    toast.classList.add('show');
+    toast.style.transform = 'translateX(0)';
+    toast.style.opacity = '1';
   });
 
   // Auto remove
   setTimeout(() => {
-    toast.classList.remove('show');
+    toast.style.transform = 'translateX(120%)';
+    toast.style.opacity = '0';
     setTimeout(() => toast.remove(), 400);
-  }, 2500);
+  }, 3000);
 }
 
 // ---- Initialize cart badge on page load ----
