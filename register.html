@@ -49,14 +49,14 @@
         <span>or register with email</span>
       </div>
       
-      <form id="register-form">
+      <form id="register-form" autocomplete="off">
         <div class="form-group">
           <label for="name">Full Name</label>
-          <input type="text" id="name" name="name" required placeholder="e.g. Ama Mensah">
+          <input type="text" id="name" name="reg_name" required placeholder="e.g. Ama Mensah" autocomplete="off">
         </div>
         <div class="form-group">
           <label for="email">Email Address</label>
-          <input type="email" id="email" name="email" required placeholder="e.g. ama@example.com">
+          <input type="text" inputmode="email" id="email" name="reg_email" required placeholder="e.g. ama@example.com" autocomplete="off">
         </div>
         <div class="form-group">
           <label for="phone">Phone Number <span style="color:#999; font-weight:400;">(optional)</span></label>
