@@ -34,7 +34,7 @@
       <h2>Create an Account</h2>
       <p class="auth-subtitle">Join us to shop for premium foodstuffs</p>
       
-      <div id="google-btn-container" style="display:none; width:100%; justify-content:center; margin-bottom:14px;"></div>
+      
       <button type="button" class="btn btn-google" id="google-signup-btn" onclick="handleGoogleSignUp()">
         <svg class="google-icon" width="20" height="20" viewBox="0 0 24 24">
           <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/>
@@ -210,33 +210,7 @@
     function setupGoogleClients() {
       if (!googleClientId || !window.google?.accounts) return;
 
-      if (window.google.accounts.id) {
-        try {
-          window.google.accounts.id.initialize({
-            client_id: googleClientId,
-            callback: handleGoogleCredentialResponse,
-            auto_select: false
-          });
-
-          const container = document.getElementById('google-btn-container');
-          if (container) {
-            container.style.display = 'flex';
-            const customBtn = document.getElementById('google-signup-btn');
-            if (customBtn) customBtn.style.display = 'none';
-            window.google.accounts.id.renderButton(container, {
-              theme: 'outline',
-              size: 'large',
-              text: 'signup_with',
-              shape: 'rectangular',
-              width: container.offsetWidth || 340,
-              logo_alignment: 'left'
-            });
-          }
-        } catch (e) {
-          console.warn('Google ID init failed:', e);
-        }
-      }
-
+      // Initialize Google OAuth 2.0 Token Client with account chooser
       if (window.google.accounts.oauth2) {
         try {
           googleTokenClient = window.google.accounts.oauth2.initTokenClient({
@@ -295,28 +269,6 @@
       }
     }
 
-    async function handleGoogleCredentialResponse(response) {
-      showToast('Creating your account with Google...', 'info');
-      try {
-        const res = await fetch('/api/auth/google', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ credential: response.credential })
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Google sign-up failed');
-
-        localStorage.setItem('soniviva_token', data.token);
-        localStorage.setItem('soniviva_user', JSON.stringify(data.user));
-        showToast(`Welcome, ${data.user.name}! 🎉`, 'success');
-
-        setTimeout(() => {
-          window.location.href = 'index.html';
-        }, 700);
-      } catch (err) {
-        showToast(err.message, 'error');
-      }
-    }
 
     window.addEventListener('load', () => {
       initGoogleAuth();
