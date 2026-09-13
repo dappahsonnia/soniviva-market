@@ -140,10 +140,10 @@ router.get('/google-config', (req, res) => {
   try {
     const db = getDb();
     const row = db.prepare("SELECT value FROM settings WHERE key = 'google_client_id'").get();
-    const clientId = (row && row.value) ? row.value : (process.env.GOOGLE_CLIENT_ID || '');
+    const clientId = (row && row.value) ? row.value : (process.env.GOOGLE_CLIENT_ID || '401970135810-b9kh0j8f7qj4c4f73q46a8an1e851u2h.apps.googleusercontent.com');
     res.json({ clientId });
   } catch (err) {
-    res.json({ clientId: process.env.GOOGLE_CLIENT_ID || '' });
+    res.json({ clientId: process.env.GOOGLE_CLIENT_ID || '401970135810-b9kh0j8f7qj4c4f73q46a8an1e851u2h.apps.googleusercontent.com' });
   }
 });
 
