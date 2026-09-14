@@ -35,6 +35,26 @@ function initCheckout() {
   renderOrderItems();
   updateStepIndicator();
   showStep(1);
+
+  // Autofill shipping if logged in
+  if (typeof getUser === 'function') {
+    const user = getUser();
+    if (user) {
+      const nameEl = document.getElementById('ship-name');
+      const emailEl = document.getElementById('ship-email');
+      const phoneEl = document.getElementById('ship-phone');
+      const addrEl = document.getElementById('ship-address');
+      const cityEl = document.getElementById('ship-city');
+      const regEl = document.getElementById('ship-region');
+
+      if (nameEl && !nameEl.value && user.name) nameEl.value = user.name;
+      if (emailEl && !emailEl.value && user.email) emailEl.value = user.email;
+      if (phoneEl && !phoneEl.value && user.phone) phoneEl.value = user.phone;
+      if (addrEl && !addrEl.value && user.address) addrEl.value = user.address;
+      if (cityEl && !cityEl.value && user.city) cityEl.value = user.city;
+      if (regEl && !regEl.value && user.region) regEl.value = user.region;
+    }
+  }
 }
 
 // ─── Step Navigation ───
@@ -435,9 +455,36 @@ function renderReviewStep() {
 }
 
 // ─── Place Order ───
-function placeOrder() {
-  // Generate order number
-  const orderNum = 'SNV-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).substring(2, 6).toUpperCase();
+async function placeOrder() {
+  const currentCart = getCart();
+  const total = getCartTotal();
+
+  // Generate default order number
+  let orderNum = 'SNV-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).substring(2, 6).toUpperCase();
+
+  // If user is logged in, sync with database
+  if (typeof isLoggedIn === 'function' && isLoggedIn()) {
+    try {
+      const items = currentCart.map(i => ({ id: i.id, quantity: i.quantity }));
+      const res = await authFetch('/api/user/orders', {
+        method: 'POST',
+        body: JSON.stringify({
+          items,
+          shipping: checkoutData.shipping,
+          payment: checkoutData.payment
+        })
+      });
+      if (res.ok) {
+        const orderData = await res.json();
+        if (orderData.orderNumber) {
+          orderNum = orderData.orderNumber;
+        }
+      }
+    } catch (e) {
+      console.warn('Backend order recording error:', e);
+    }
+  }
+
   checkoutData.orderNumber = orderNum;
 
   // Calculate estimated delivery

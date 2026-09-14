@@ -41,12 +41,14 @@ class Database {
     return {
       run(...params) {
         _db.run(sql, params.length === 1 && typeof params[0] === 'object' && !Array.isArray(params[0]) ? Object.values(params[0]) : params);
-        saveDatabase();
         const info = { changes: _db.getRowsModified(), lastInsertRowid: 0 };
         try {
           const r = _db.exec("SELECT last_insert_rowid() as id");
-          if (r.length > 0) info.lastInsertRowid = r[0].values[0][0];
+          if (r.length > 0 && r[0].values && r[0].values.length > 0) {
+            info.lastInsertRowid = r[0].values[0][0];
+          }
         } catch (e) {}
+        saveDatabase();
         return info;
       },
       get(...params) {

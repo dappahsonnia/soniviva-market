@@ -30,7 +30,7 @@ function isAdmin() {
 function logout() {
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(USER_KEY);
-  window.location.href = '/login.html';
+  window.location.href = 'login.html';
 }
 
 async function authFetch(url, options = {}) {
@@ -50,8 +50,11 @@ async function authFetch(url, options = {}) {
   });
 
   if (response.status === 401) {
-    // Unauthorized, token might be expired
-    logout();
+    // Avoid infinite redirect loop — only logout if not already on login page
+    const currentPage = window.location.pathname.split('/').pop() || '';
+    if (currentPage !== 'login.html' && currentPage !== 'login' && currentPage !== 'register.html' && currentPage !== 'register') {
+      logout();
+    }
   }
 
   return response;
@@ -74,13 +77,13 @@ function updateAuthNav() {
       authHtml += `<a href="/admin/" class="btn btn-sm btn-outline" style="margin-right: 10px;">Admin</a>`;
     }
     authHtml += `
-      <a href="/profile.html" style="margin-right: 15px; font-weight: 500; font-size: 0.9rem;">Hi, ${user.name.split(' ')[0]}</a>
+      <a href="profile.html" style="margin-right: 15px; font-weight: 500; font-size: 0.9rem;">Hi, ${user.name.split(' ')[0]}</a>
       <a href="#" onclick="logout(); return false;" style="margin-right: 15px; font-size: 0.9rem; color: var(--text-muted);">Logout</a>
     `;
   } else {
     authHtml += `
-      <a href="/login.html" style="margin-right: 15px; font-size: 0.9rem; font-weight: 500;">Login</a>
-      <a href="/register.html" class="btn btn-sm btn-primary" style="margin-right: 15px;">Register</a>
+      <a href="login.html" style="margin-right: 15px; font-size: 0.9rem; font-weight: 500;">Login</a>
+      <a href="register.html" class="btn btn-sm btn-primary" style="margin-right: 15px;">Register</a>
     `;
   }
 
@@ -102,13 +105,13 @@ function updateAuthNav() {
 
 function requireAuth() {
   if (!isLoggedIn()) {
-    window.location.href = '/login.html';
+    window.location.href = 'login.html';
   }
 }
 
 function requireAdmin() {
   if (!isAdmin()) {
-    window.location.href = '/login.html';
+    window.location.href = 'login.html';
   }
 }
 

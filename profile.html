@@ -48,17 +48,17 @@
               <input type="email" id="profile-email" readonly style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: #f5f5f5;">
             </div>
             <div class="form-group" style="margin-bottom: 16px;">
-              <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 6px;">Phone Number</label>
-              <input type="tel" id="profile-phone" required style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: var(--radius-sm);">
+              <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 6px;">Phone Number <span style="color: #999; font-weight: 400;">(optional)</span></label>
+              <input type="tel" id="profile-phone" placeholder="+233 XX XXX XXXX" style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: var(--radius-sm);">
             </div>
             <div class="form-group" style="margin-bottom: 16px;">
               <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 6px;">Delivery Address</label>
-              <input type="text" id="profile-address" style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: var(--radius-sm);">
+              <input type="text" id="profile-address" placeholder="Street address or landmark" style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: var(--radius-sm);">
             </div>
             <div class="profile-city-region-grid">
               <div class="form-group" style="margin-bottom: 16px;">
-                <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 6px;">City</label>
-                <input type="text" id="profile-city" style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: var(--radius-sm);">
+                <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 6px;">City / Town</label>
+                <input type="text" id="profile-city" placeholder="e.g. Accra" style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: var(--radius-sm);">
               </div>
               <div class="form-group" style="margin-bottom: 16px;">
                 <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 6px;">Region</label>
@@ -66,9 +66,20 @@
                   <option value="">Select Region</option>
                   <option value="Greater Accra">Greater Accra</option>
                   <option value="Ashanti">Ashanti</option>
-                  <option value="Central">Central</option>
-                  <option value="Eastern">Eastern</option>
                   <option value="Western">Western</option>
+                  <option value="Eastern">Eastern</option>
+                  <option value="Central">Central</option>
+                  <option value="Northern">Northern</option>
+                  <option value="Volta">Volta</option>
+                  <option value="Upper East">Upper East</option>
+                  <option value="Upper West">Upper West</option>
+                  <option value="Bono">Bono</option>
+                  <option value="Bono East">Bono East</option>
+                  <option value="Ahafo">Ahafo</option>
+                  <option value="Savannah">Savannah</option>
+                  <option value="North East">North East</option>
+                  <option value="Oti">Oti</option>
+                  <option value="Western North">Western North</option>
                 </select>
               </div>
             </div>
@@ -82,15 +93,15 @@
           <form id="password-form">
             <div class="form-group" style="margin-bottom: 16px;">
               <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 6px;">Current Password</label>
-              <input type="password" id="current-password" required style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: var(--radius-sm);">
+              <input type="password" id="current-password" required placeholder="Enter current password" style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: var(--radius-sm);">
             </div>
             <div class="form-group" style="margin-bottom: 16px;">
               <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 6px;">New Password</label>
-              <input type="password" id="new-password" required style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: var(--radius-sm);">
+              <input type="password" id="new-password" required placeholder="At least 8 characters" minlength="8" style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: var(--radius-sm);">
             </div>
             <div class="form-group" style="margin-bottom: 16px;">
               <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 6px;">Confirm New Password</label>
-              <input type="password" id="confirm-new-password" required style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: var(--radius-sm);">
+              <input type="password" id="confirm-new-password" required placeholder="Re-enter new password" style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: var(--radius-sm);">
             </div>
             <button type="submit" class="btn btn-outline" style="margin-top: 10px;">Update Password</button>
           </form>
@@ -124,6 +135,15 @@
     </div>
   </div>
 
+  <!-- Order Details Modal -->
+  <div id="order-modal" style="display:none; position:fixed; inset:0; z-index:10000; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; padding:20px;">
+    <div style="background:#fff; border-radius:16px; padding:32px; max-width:550px; width:100%; max-height:85vh; overflow-y:auto; box-shadow:0 8px 40px rgba(0,0,0,0.15); position:relative;">
+      <button onclick="closeOrderModal()" style="position:absolute; top:16px; right:20px; background:none; border:none; font-size:1.5rem; cursor:pointer; color:#999;">&times;</button>
+      <h3 id="modal-order-number" style="margin-bottom:8px; font-family:'Playfair Display',serif; font-size:1.3rem;">Order Details</h3>
+      <div id="modal-order-body" style="margin-top:16px;"></div>
+    </div>
+  </div>
+
   <footer class="footer">
     <div class="container">
       <div class="footer-bottom" style="text-align: center;">
@@ -139,6 +159,8 @@
   <script>
     requireAuth(); // Ensure user is logged in
     
+    let loadedOrders = [];
+
     document.addEventListener('DOMContentLoaded', async () => {
       // Fetch Profile
       try {
@@ -157,31 +179,102 @@
       }
       
       // Fetch Orders
+      loadOrders();
+    });
+
+    async function loadOrders() {
+      const tbody = document.getElementById('orders-tbody');
       try {
         const res = await authFetch('/api/user/orders');
-        const tbody = document.getElementById('orders-tbody');
         if (res.ok) {
-          const orders = await res.json();
-          if (orders.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" style="padding: 20px; text-align: center; color: var(--text-muted);">You have no orders yet.</td></tr>';
+          loadedOrders = await res.json();
+          if (!loadedOrders || loadedOrders.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="padding: 24px; text-align: center; color: var(--text-muted);">You have no orders yet.</td></tr>';
           } else {
-            tbody.innerHTML = orders.map(o => `
-              <tr style="border-bottom: 1px solid var(--border);">
-                <td style="padding: 16px 12px; font-weight: 600;">${o.id}</td>
-                <td style="padding: 16px 12px;">${new Date(o.date).toLocaleDateString()}</td>
-                <td style="padding: 16px 12px;">${o.itemsCount} items</td>
-                <td style="padding: 16px 12px; font-weight: 600; color: var(--primary);">GH₵ ${o.total.toFixed(2)}</td>
-                <td style="padding: 16px 12px;"><span class="order-status ${o.status.toLowerCase()}">${o.status}</span></td>
-                <td style="padding: 16px 12px;"><button class="btn btn-sm btn-outline" onclick="alert('View details for ${o.id}')">View</button></td>
-              </tr>
-            `).join('');
+            tbody.innerHTML = loadedOrders.map((o, idx) => {
+              const orderNum = o.order_number || ('#' + o.id);
+              const dateStr = o.created_at ? new Date(o.created_at).toLocaleDateString('en-GB') : 'N/A';
+              const itemsCount = o.items ? o.items.length : 0;
+              const statusClass = (o.status || 'pending').toLowerCase();
+              return `
+                <tr style="border-bottom: 1px solid var(--border);">
+                  <td style="padding: 16px 12px; font-weight: 600; font-family: monospace;">${orderNum}</td>
+                  <td style="padding: 16px 12px;">${dateStr}</td>
+                  <td style="padding: 16px 12px;">${itemsCount} item${itemsCount !== 1 ? 's' : ''}</td>
+                  <td style="padding: 16px 12px; font-weight: 600; color: var(--primary);">GH₵ ${Number(o.total || 0).toFixed(2)}</td>
+                  <td style="padding: 16px 12px;"><span class="order-status ${statusClass}">${o.status || 'Pending'}</span></td>
+                  <td style="padding: 16px 12px;"><button class="btn btn-sm btn-outline" onclick="viewOrderDetails(${idx})">View</button></td>
+                </tr>
+              `;
+            }).join('');
           }
         } else {
           tbody.innerHTML = '<tr><td colspan="6" style="padding: 20px; text-align: center; color: var(--text-muted);">Failed to load orders.</td></tr>';
         }
       } catch (e) {
         console.error('Error fetching orders', e);
+        tbody.innerHTML = '<tr><td colspan="6" style="padding: 20px; text-align: center; color: var(--text-muted);">Failed to load orders.</td></tr>';
       }
+    }
+
+    function viewOrderDetails(index) {
+      const o = loadedOrders[index];
+      if (!o) return;
+
+      const modal = document.getElementById('order-modal');
+      const title = document.getElementById('modal-order-number');
+      const body = document.getElementById('modal-order-body');
+
+      title.textContent = `Order ${o.order_number || ('#' + o.id)}`;
+      
+      const itemsHtml = (o.items && o.items.length) 
+        ? o.items.map(item => `
+          <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #eee; font-size:0.92rem;">
+            <span>${item.product_name} × ${item.quantity}</span>
+            <span style="font-weight:600;">GH₵ ${Number(item.total).toFixed(2)}</span>
+          </div>
+        `).join('')
+        : '<p style="color:#999;">No items details available.</p>';
+
+      body.innerHTML = `
+        <div style="margin-bottom:16px;">
+          <div style="display:flex; justify-content:space-between; font-size:0.88rem; color:#666; margin-bottom:6px;">
+            <span>Date: ${o.created_at ? new Date(o.created_at).toLocaleString() : 'N/A'}</span>
+            <span class="order-status ${(o.status||'pending').toLowerCase()}">${o.status}</span>
+          </div>
+          <div style="font-size:0.88rem; color:#666;">
+            <span>Delivery to: <strong>${o.shipping_name || ''}</strong> — ${o.shipping_address || ''}, ${o.shipping_city || ''}</span>
+          </div>
+        </div>
+
+        <h4 style="font-size:1rem; margin-bottom:10px; border-top:1px solid #eee; padding-top:12px;">Items Ordered</h4>
+        ${itemsHtml}
+
+        <div style="margin-top:16px; padding-top:12px; border-top:2px solid #eee;">
+          <div style="display:flex; justify-content:space-between; font-size:0.9rem; margin-bottom:6px;">
+            <span>Subtotal</span>
+            <span>GH₵ ${Number(o.subtotal || 0).toFixed(2)}</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:0.9rem; margin-bottom:6px;">
+            <span>Delivery Fee</span>
+            <span>GH₵ ${Number(o.delivery_fee || 15).toFixed(2)}</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:1.05rem; font-weight:700; color:var(--primary); margin-top:8px;">
+            <span>Total</span>
+            <span>GH₵ ${Number(o.total || 0).toFixed(2)}</span>
+          </div>
+        </div>
+      `;
+
+      modal.style.display = 'flex';
+    }
+
+    function closeOrderModal() {
+      document.getElementById('order-modal').style.display = 'none';
+    }
+
+    document.getElementById('order-modal').addEventListener('click', (e) => {
+      if (e.target.id === 'order-modal') closeOrderModal();
     });
     
     // Save Profile
@@ -205,9 +298,9 @@
           body: JSON.stringify(payload)
         });
         
-        if (!res.ok) throw new Error('Failed to update profile');
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || 'Failed to update profile');
         
-        const data = await res.json();
         // Update local user data
         if (data.user) {
           localStorage.setItem('soniviva_user', JSON.stringify(data.user));
@@ -241,14 +334,14 @@
       btn.textContent = 'Updating...';
       
       try {
-        const res = await authFetch('/api/auth/reset-password', {
+        const res = await authFetch('/api/user/change-password', {
           method: 'POST',
           body: JSON.stringify({ currentPassword, newPassword })
         });
         
+        const data = await res.json().catch(() => ({}));
         if (!res.ok) {
-          const data = await res.json().catch(() => ({}));
-          throw new Error(data.message || 'Failed to update password');
+          throw new Error(data.error || data.message || 'Failed to update password');
         }
         
         showToast('Password updated successfully!', 'success');
