@@ -45,9 +45,11 @@ function initMobileMenu() {
     document.body.style.overflow = isActive ? 'hidden' : '';
   });
 
-  // Close menu when a link is clicked
-  navLinks.querySelectorAll('a').forEach(link => {
-    link.addEventListener('click', closeMenu);
+  // Close menu when any link or action button inside is clicked
+  navLinks.addEventListener('click', (e) => {
+    if (e.target.closest('a') || e.target.closest('button')) {
+      closeMenu();
+    }
   });
 
   // Close menu on Escape key

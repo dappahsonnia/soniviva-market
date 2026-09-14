@@ -316,6 +316,16 @@ p {
   gap: 20px;
 }
 
+.desktop-auth-links {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.mobile-nav-profile-wrapper {
+  display: none;
+}
+
 .cart-link {
   position: relative;
   display: flex;
@@ -1907,20 +1917,21 @@ body {
 
 /* ─── Breakpoint: Tablets Portrait & Phablets (max-width: 992px) ─── */
 @media (max-width: 992px) {
+  .desktop-auth-links {
+    display: none !important;
+  }
   .nav-links {
     position: fixed;
     top: var(--nav-height);
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(255, 255, 255, 0.98);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    background: #FAF9F6;
     flex-direction: column;
     justify-content: flex-start;
-    align-items: center;
-    gap: 20px;
-    padding: 36px 24px;
+    align-items: stretch;
+    gap: 8px;
+    padding: 20px 16px 40px;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     transform: translateX(100%);
@@ -1931,13 +1942,219 @@ body {
     transform: translateX(0);
     box-shadow: -6px 0 30px rgba(0,0,0,0.12);
   }
-  .nav-links a {
-    font-size: 1.15rem;
+  .nav-links li {
+    width: 100%;
+    list-style: none;
+  }
+  .nav-links li:not(.mobile-nav-profile-wrapper) a {
+    font-size: 0.98rem;
     font-weight: 600;
     width: 100%;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 13px 16px;
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    transition: var(--transition);
+    margin-bottom: 6px;
+  }
+  .nav-links li:not(.mobile-nav-profile-wrapper) a:hover,
+  .nav-links li:not(.mobile-nav-profile-wrapper) a.active {
+    background: #ffffff;
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+  .nav-links li:not(.mobile-nav-profile-wrapper) a::after {
+    content: '›';
+    position: static;
+    width: auto;
+    height: auto;
+    background: none;
+    font-size: 1.3rem;
+    color: var(--text-muted);
+    font-weight: 400;
+    transition: transform 0.2s ease;
+  }
+  .nav-links li:not(.mobile-nav-profile-wrapper) a:hover::after {
+    transform: translateX(3px);
+    color: var(--primary);
+  }
+
+  /* ─── Mobile Profile Card inside 3 lines menu ─── */
+  .mobile-nav-profile-wrapper {
+    display: block !important;
+    width: 100%;
+    margin-bottom: 8px;
+  }
+  .mobile-profile-card {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 18px 16px;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.06);
+    border: 1px solid var(--border);
+    text-align: left;
+    margin-bottom: 12px;
+  }
+  .mobile-profile-card.guest {
+    background: linear-gradient(135deg, #ffffff 0%, #F5F7F4 100%);
+  }
+  .mobile-profile-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .mobile-profile-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    color: #ffffff;
+    font-size: 1.35rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 10px rgba(27, 94, 32, 0.25);
+    flex-shrink: 0;
+  }
+  .mobile-profile-avatar.guest {
+    background: #ECEAE3;
+    color: var(--text);
+    box-shadow: none;
+  }
+  .mobile-profile-info {
+    flex: 1;
+    min-width: 0;
+  }
+  .mobile-profile-name {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.25;
+  }
+  .mobile-profile-email {
+    font-size: 0.8rem;
+    color: var(--text-light);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin: 2px 0 6px;
+  }
+  .mobile-profile-badge {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 2px 9px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+  .mobile-profile-badge.admin {
+    background: #FFF3E0;
+    color: #E65100;
+    border: 1px solid #FFE0B2;
+  }
+  .mobile-profile-badge.customer {
+    background: #E8F5E9;
+    color: #2E7D32;
+    border: 1px solid #C8E6C9;
+  }
+  .mobile-profile-meta {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 0.82rem;
+    color: var(--text-light);
+    margin-top: 6px;
+    padding-left: 2px;
+  }
+  .mobile-profile-meta .meta-icon {
+    font-size: 0.95rem;
+    flex-shrink: 0;
+  }
+  .mobile-profile-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+  .mobile-profile-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 9px 10px;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-decoration: none;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    transition: all 0.2s ease;
+  }
+  .mobile-profile-btn:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+  .mobile-profile-btn.admin-btn {
+    grid-column: span 2;
+    background: linear-gradient(135deg, #FF6F00, #FFA000);
+    color: #ffffff;
+    border: none;
+    font-weight: 700;
+  }
+  .mobile-profile-btn.logout-btn {
+    border-color: #FFCDD2;
+    color: #C62828;
+    background: #FFEBEE;
+    cursor: pointer;
+  }
+  .mobile-profile-btn.logout-btn:hover {
+    background: #FFCDD2;
+  }
+  .mobile-auth-btn-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+  .mobile-auth-btn-row .btn {
+    flex: 1;
     text-align: center;
-    padding: 10px 0;
-    border-bottom: 1px solid rgba(0,0,0,0.06);
+    justify-content: center;
+    padding: 10px 14px;
+    font-size: 0.88rem;
+  }
+  .mobile-nav-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 14px 0 6px;
+    width: 100%;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+  }
+  .mobile-nav-divider::before,
+  .mobile-nav-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid var(--border);
+  }
+  .mobile-nav-divider span {
+    padding: 0 10px;
   }
   .mobile-toggle {
     display: flex;
