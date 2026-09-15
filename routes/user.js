@@ -108,42 +108,6 @@ router.post('/orders', (req, res) => {
       db.prepare('UPDATE products SET stock=MAX(0,stock-?) WHERE id=?').run(i.quantity, i.product_id);
     });
 
-    // ─── Notify Admin ───
-    const customerName = s.name || req.user.name || 'Customer';
-    const customerEmail = s.email || req.user.email || '';
-    const customerPhone = s.phone || '';
-
-    // 1. Insert in-app notification
-    const itemsSummary = resolved.map(i => `${i.product_name} ×${i.quantity}`).join(', ');
-    try {
-      db.prepare(`INSERT INTO notifications (type, title, message, order_id) VALUES (?, ?, ?, ?)`)
-        .run(
-          'order',
-          `New Order ${orderNumber}`,
-          `${customerName} placed an order for GH₵ ${total.toFixed(2)} — ${itemsSummary}`,
-          orderId
-        );
-    } catch (notifErr) {
-      console.warn('Notification insert failed:', notifErr.message);
-    }
-
-    // 2. Send email notification (async, non-blocking)
-    try {
-      const { sendOrderNotificationEmail } = require('../utils/email');
-      sendOrderNotificationEmail({
-        orderNumber, total, subtotal, deliveryFee,
-        customerName, customerEmail, customerPhone,
-        shippingAddress: s.address || '',
-        shippingCity: s.city || '',
-        shippingRegion: s.region || '',
-        paymentMethod: p.method || '',
-        items: resolved,
-        createdAt: new Date().toISOString()
-      }).catch(err => console.warn('Email notification error:', err.message));
-    } catch (emailErr) {
-      console.warn('Email module error:', emailErr.message);
-    }
-
     res.status(201).json({ message: 'Order placed successfully', orderNumber, orderId, total });
   } catch (err) {
     console.error('Order error:', err);

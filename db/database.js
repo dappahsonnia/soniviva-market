@@ -285,16 +285,6 @@ function createTables() {
       value TEXT,
       updated_at DATETIME DEFAULT (datetime('now'))
     );
-
-    CREATE TABLE IF NOT EXISTS notifications (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      type TEXT DEFAULT 'order',
-      title TEXT NOT NULL,
-      message TEXT NOT NULL,
-      order_id INTEGER,
-      is_read INTEGER DEFAULT 0,
-      created_at DATETIME DEFAULT (datetime('now'))
-    );
   `);
 }
 

@@ -51,7 +51,6 @@ app.use('/api', async (req, res, next) => {
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/user', require('./routes/user'));
-app.use('/api/orders', require('./routes/orders'));
 
 // ─── API Products endpoint (public) ───
 app.get('/api/products', (req, res) => {
