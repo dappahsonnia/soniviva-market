@@ -146,5 +146,35 @@ router.put('/settings', (req, res) => {
     res.json({ message: 'Settings saved successfully' });
   } catch (err) { res.status(500).json({ error: 'Failed to save settings' }); }
 });
+// ─── Notifications ───
+router.get('/notifications', (req, res) => {
+  try {
+    const db = getDb();
+    const notifications = db.prepare('SELECT * FROM notifications ORDER BY is_read ASC, created_at DESC LIMIT 50').all();
+    res.json(notifications);
+  } catch (err) { res.status(500).json({ error: 'Failed to fetch notifications' }); }
+});
+
+router.get('/notifications/unread-count', (req, res) => {
+  try {
+    const db = getDb();
+    const row = db.prepare('SELECT COUNT(*) as count FROM notifications WHERE is_read = 0').get();
+    res.json({ count: row?.count || 0 });
+  } catch (err) { res.status(500).json({ error: 'Failed', count: 0 }); }
+});
+
+router.put('/notifications/:id/read', (req, res) => {
+  try {
+    getDb().prepare('UPDATE notifications SET is_read = 1 WHERE id = ?').run(parseInt(req.params.id));
+    res.json({ message: 'Marked as read' });
+  } catch (err) { res.status(500).json({ error: 'Failed' }); }
+});
+
+router.put('/notifications/mark-all-read', (req, res) => {
+  try {
+    getDb().prepare('UPDATE notifications SET is_read = 1 WHERE is_read = 0').run();
+    res.json({ message: 'All marked as read' });
+  } catch (err) { res.status(500).json({ error: 'Failed' }); }
+});
 
 module.exports = router;

@@ -325,5 +325,109 @@ async function deleteCategory(id) {
 // ─── Mobile sidebar toggle ───
 function toggleSidebar() { document.querySelector('.sidebar')?.classList.toggle('open'); }
 
+// ─── Notifications System ───
+let notifPollTimer = null;
+
+async function checkUnreadNotifications() {
+  const data = await api('/notifications/unread-count');
+  const count = data?.count || 0;
+  const badge = document.getElementById('notif-badge');
+  if (badge) {
+    if (count > 0) {
+      badge.textContent = count > 99 ? '99+' : count;
+      badge.style.display = 'flex';
+    } else {
+      badge.style.display = 'none';
+    }
+  }
+  return count;
+}
+
+function timeAgo(dateStr) {
+  if (!dateStr) return '';
+  const date = new Date(dateStr.endsWith('Z') ? dateStr : dateStr + 'Z');
+  const diffSec = Math.floor((new Date() - date) / 1000);
+  if (isNaN(diffSec) || diffSec < 0) return 'Just now';
+  if (diffSec < 60) return 'Just now';
+  const diffMin = Math.floor(diffSec / 60);
+  if (diffMin < 60) return `${diffMin}m ago`;
+  const diffHours = Math.floor(diffMin / 60);
+  if (diffHours < 24) return `${diffHours}h ago`;
+  const diffDays = Math.floor(diffHours / 24);
+  if (diffDays === 1) return 'Yesterday';
+  if (diffDays < 7) return `${diffDays}d ago`;
+  return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+}
+
+async function loadNotifications() {
+  const listEl = document.getElementById('notif-list');
+  if (!listEl) return;
+  listEl.innerHTML = '<div class="notif-empty">Loading notifications...</div>';
+
+  const items = await api('/notifications') || [];
+  if (items.length === 0) {
+    listEl.innerHTML = '<div class="notif-empty">No notifications yet</div>';
+    return;
+  }
+
+  listEl.innerHTML = items.map(n => `
+    <div class="notif-item ${n.is_read ? '' : 'unread'}" onclick="handleNotifClick(${n.id}, ${n.order_id || 'null'}, ${Boolean(n.is_read)})">
+      <div class="notif-item-icon">${n.type === 'order' ? '🛒' : '🔔'}</div>
+      <div class="notif-item-body">
+        <div class="notif-item-title">
+          <span>${n.title}</span>
+          <span class="notif-item-time">${timeAgo(n.created_at)}</span>
+        </div>
+        <div class="notif-item-text">${n.message}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function handleNotifClick(id, orderId, isRead) {
+  if (!isRead) {
+    await api(`/notifications/${id}/read`, 'PUT');
+    await checkUnreadNotifications();
+  }
+  document.getElementById('notif-dropdown')?.classList.remove('show');
+  window.location.href = 'orders.html';
+}
+
+function toggleNotifDropdown(e) {
+  if (e) e.stopPropagation();
+  const dropdown = document.getElementById('notif-dropdown');
+  if (!dropdown) return;
+  const isShown = dropdown.classList.toggle('show');
+  if (isShown) {
+    loadNotifications();
+  }
+}
+
+async function markAllNotificationsRead(e) {
+  if (e) e.stopPropagation();
+  await api('/notifications/mark-all-read', 'PUT');
+  await checkUnreadNotifications();
+  loadNotifications();
+  showToast('All marked as read');
+}
+
+function initNotifications() {
+  checkUnreadNotifications();
+  if (notifPollTimer) clearInterval(notifPollTimer);
+  notifPollTimer = setInterval(checkUnreadNotifications, 25000);
+
+  document.addEventListener('click', (e) => {
+    const wrapper = document.getElementById('notif-wrapper');
+    const dropdown = document.getElementById('notif-dropdown');
+    if (dropdown && dropdown.classList.contains('show') && wrapper && !wrapper.contains(e.target)) {
+      dropdown.classList.remove('show');
+    }
+  });
+}
+
 // Init
-document.addEventListener('DOMContentLoaded', () => { if (!adminGuard()) return; initSidebar(); });
+document.addEventListener('DOMContentLoaded', () => {
+  if (!adminGuard()) return;
+  initSidebar();
+  initNotifications();
+});

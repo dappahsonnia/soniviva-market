@@ -462,27 +462,30 @@ async function placeOrder() {
   // Generate default order number
   let orderNum = 'SNV-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).substring(2, 6).toUpperCase();
 
-  // If user is logged in, sync with database
-  if (typeof isLoggedIn === 'function' && isLoggedIn()) {
-    try {
-      const items = currentCart.map(i => ({ id: i.id, quantity: i.quantity }));
-      const res = await authFetch('/api/user/orders', {
-        method: 'POST',
-        body: JSON.stringify({
-          items,
-          shipping: checkoutData.shipping,
-          payment: checkoutData.payment
-        })
-      });
-      if (res.ok) {
-        const orderData = await res.json();
-        if (orderData.orderNumber) {
-          orderNum = orderData.orderNumber;
-        }
+  // Sync with backend (for both logged-in users and guests to notify admin)
+  try {
+    const items = currentCart.map(i => ({ id: i.id, quantity: i.quantity }));
+    const token = localStorage.getItem('soniviva_token');
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    const res = await fetch('/api/orders', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        items,
+        shipping: checkoutData.shipping,
+        payment: checkoutData.payment
+      })
+    });
+    if (res.ok) {
+      const orderData = await res.json();
+      if (orderData.orderNumber) {
+        orderNum = orderData.orderNumber;
       }
-    } catch (e) {
-      console.warn('Backend order recording error:', e);
     }
+  } catch (e) {
+    console.warn('Backend order recording error:', e);
   }
 
   checkoutData.orderNumber = orderNum;
