@@ -308,6 +308,12 @@
         return;
       }
 
+      if (!/[A-Z]/.test(newPassword) || !/[0-9]/.test(newPassword)) {
+        errorEl.textContent = 'Password must contain at least one uppercase letter and one number.';
+        errorEl.style.display = 'block';
+        return;
+      }
+
       try {
         btn.disabled = true;
         btn.textContent = 'Resetting...';
@@ -326,6 +332,10 @@
         showToast(data.message || 'Password reset successfully! Please log in.', 'success');
         forgotModal.style.display = 'none';
         document.getElementById('forgot-password-form').reset();
+        const pwdInput = document.getElementById('password');
+        if (pwdInput) {
+          pwdInput.focus();
+        }
       } catch (err) {
         errorEl.textContent = err.message;
         errorEl.style.display = 'block';
@@ -334,6 +344,24 @@
         btn.textContent = 'Reset Password';
       }
     });
+
+    // Auto-open forgot modal or pre-fill email if passed via query params
+    const urlParams = new URLSearchParams(window.location.search);
+    const prefillEmail = urlParams.get('email');
+    if (prefillEmail) {
+      const emailInput = document.getElementById('email');
+      if (emailInput) emailInput.value = prefillEmail;
+      const resetEmail = document.getElementById('reset-email');
+      if (resetEmail) resetEmail.value = prefillEmail;
+    }
+    if (urlParams.get('forgot') === '1' || urlParams.get('forgot') === 'true') {
+      forgotModal.style.display = 'flex';
+      if (prefillEmail) {
+        document.getElementById('reset-password')?.focus();
+      } else {
+        document.getElementById('reset-email')?.focus();
+      }
+    }
   </script>
 </body>
 </html>

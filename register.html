@@ -75,6 +75,22 @@
           <input type="password" id="confirm_password" name="confirm_password" required placeholder="Confirm your password">
           <div id="password-error" class="form-error" style="display: none;">Passwords do not match</div>
         </div>
+
+        <div id="email-exists-box" style="display:none; background:#FFF8E1; border:1px solid #FFE082; border-radius:12px; padding:16px; margin:14px 0; text-align:left; animation:fadeIn 0.25s ease;">
+          <div style="display:flex; gap:12px; align-items:flex-start;">
+            <span style="font-size:1.4rem; line-height:1;">⚠️</span>
+            <div style="flex:1;">
+              <strong style="color:#B78103; font-size:0.95rem; display:block; margin-bottom:4px;">Account Already Exists</strong>
+              <p style="color:#5D4037; font-size:0.86rem; margin:0 0 12px; line-height:1.5;">
+                An account with the email <strong id="exists-email-text" style="color:#2D2D2D;"></strong> has already been registered. You cannot create another account with this email. If you have forgotten your password, you can reset it below.
+              </p>
+              <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <button type="button" id="open-reset-btn" class="btn btn-sm btn-primary" style="padding:8px 14px; font-size:0.82rem;">Reset Forgotten Password</button>
+                <a id="login-link-btn" href="login.html" class="btn btn-sm" style="padding:8px 14px; font-size:0.82rem; background:#fff; border:1px solid #ccc; color:#333;">Log In Instead</a>
+              </div>
+            </div>
+          </div>
+        </div>
         
         <button type="submit" class="btn btn-primary" style="margin-top: 10px;">Register</button>
       </form>
@@ -82,6 +98,31 @@
       <div class="auth-footer">
         Already have an account? <a href="login.html">Login here</a>
       </div>
+    </div>
+  </div>
+
+  <!-- Forgot Password Modal -->
+  <div id="forgot-password-modal" style="display:none; position:fixed; inset:0; z-index:10000; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; padding:20px;">
+    <div style="background:#fff; border-radius:16px; padding:36px 32px; max-width:420px; width:100%; box-shadow:0 8px 40px rgba(0,0,0,0.15); position:relative;">
+      <button id="close-forgot-modal" type="button" style="position:absolute; top:12px; right:16px; background:none; border:none; font-size:1.5rem; cursor:pointer; color:#999;">&times;</button>
+      <h3 style="margin-bottom:8px; font-family:'Playfair Display',serif; font-size:1.3rem;">Reset Your Password</h3>
+      <p style="color:#6B6B6B; font-size:0.88rem; margin-bottom:24px;">Enter your registered email and your new password below.</p>
+      <form id="forgot-password-form">
+        <div class="form-group">
+          <label for="reset-email">Email Address</label>
+          <input type="email" id="reset-email" required placeholder="Your registered email" style="width:100%; padding:12px 16px; border:1px solid #E5E2DB; border-radius:8px; font-size:0.95rem;">
+        </div>
+        <div class="form-group">
+          <label for="reset-password">New Password</label>
+          <input type="password" id="reset-password" required placeholder="At least 8 characters, 1 uppercase, 1 number" minlength="8" style="width:100%; padding:12px 16px; border:1px solid #E5E2DB; border-radius:8px; font-size:0.95rem;">
+        </div>
+        <div class="form-group">
+          <label for="reset-password-confirm">Confirm New Password</label>
+          <input type="password" id="reset-password-confirm" required placeholder="Re-enter new password" style="width:100%; padding:12px 16px; border:1px solid #E5E2DB; border-radius:8px; font-size:0.95rem;">
+        </div>
+        <div id="reset-error" style="display:none; color:#D32F2F; font-size:0.82rem; margin-bottom:12px;"></div>
+        <button type="submit" class="btn btn-primary" id="reset-btn" style="width:100%; padding:14px; font-size:1rem;">Reset Password & Log In</button>
+      </form>
     </div>
   </div>
 
@@ -139,6 +180,20 @@
     });
 
     // Registration form handler
+    const emailExistsBox = document.getElementById('email-exists-box');
+    const existsEmailText = document.getElementById('exists-email-text');
+    const emailInput = document.getElementById('email');
+    const loginLinkBtn = document.getElementById('login-link-btn');
+    const openResetBtn = document.getElementById('open-reset-btn');
+    const forgotModal = document.getElementById('forgot-password-modal');
+    const closeForgotModal = document.getElementById('close-forgot-modal');
+    const resetEmailInput = document.getElementById('reset-email');
+
+    // Hide error alert when typing a different email
+    emailInput.addEventListener('input', () => {
+      if (emailExistsBox) emailExistsBox.style.display = 'none';
+    });
+
     document.getElementById('register-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       
@@ -152,13 +207,14 @@
       passwordError.style.display = 'none';
       
       const name = document.getElementById('name').value;
-      const email = document.getElementById('email').value;
+      const email = emailInput.value.trim();
       const phone = document.getElementById('phone').value;
       const btn = e.target.querySelector('button[type="submit"]');
       
       try {
         btn.disabled = true;
         btn.textContent = 'Creating account...';
+        if (emailExistsBox) emailExistsBox.style.display = 'none';
         
         const response = await fetch('/api/auth/register', {
           method: 'POST',
@@ -168,6 +224,16 @@
         
         const data = await response.json().catch(() => ({}));
         if (!response.ok) {
+          // Check if email already registered
+          if (response.status === 409 || data.code === 'EMAIL_ALREADY_REGISTERED' || (data.error && /already (exists|registered)/i.test(data.error))) {
+            if (emailExistsBox) {
+              existsEmailText.textContent = email;
+              loginLinkBtn.href = 'login.html?email=' + encodeURIComponent(email);
+              emailExistsBox.style.display = 'block';
+              emailExistsBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+            throw new Error(data.error || 'This email is already registered. If you forgot your password, please use Forgot Password.');
+          }
           throw new Error(data.error || data.message || 'Registration failed.');
         }
 
@@ -186,6 +252,87 @@
       } finally {
         btn.disabled = false;
         btn.textContent = 'Register';
+      }
+    });
+
+    // Forgot Password Modal in Register Page
+    if (openResetBtn) {
+      openResetBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (resetEmailInput) resetEmailInput.value = emailInput.value.trim();
+        forgotModal.style.display = 'flex';
+        document.getElementById('reset-password')?.focus();
+      });
+    }
+
+    if (closeForgotModal) {
+      closeForgotModal.addEventListener('click', () => {
+        forgotModal.style.display = 'none';
+      });
+    }
+
+    if (forgotModal) {
+      forgotModal.addEventListener('click', (e) => {
+        if (e.target === forgotModal) forgotModal.style.display = 'none';
+      });
+    }
+
+    document.getElementById('forgot-password-form')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('reset-email').value.trim();
+      const newPassword = document.getElementById('reset-password').value;
+      const confirmPassword = document.getElementById('reset-password-confirm').value;
+      const errorEl = document.getElementById('reset-error');
+      const btn = document.getElementById('reset-btn');
+
+      errorEl.style.display = 'none';
+
+      if (newPassword !== confirmPassword) {
+        errorEl.textContent = 'Passwords do not match.';
+        errorEl.style.display = 'block';
+        return;
+      }
+
+      if (newPassword.length < 8) {
+        errorEl.textContent = 'Password must be at least 8 characters.';
+        errorEl.style.display = 'block';
+        return;
+      }
+
+      if (!/[A-Z]/.test(newPassword) || !/[0-9]/.test(newPassword)) {
+        errorEl.textContent = 'Password must contain at least one uppercase letter and one number.';
+        errorEl.style.display = 'block';
+        return;
+      }
+
+      try {
+        btn.disabled = true;
+        btn.textContent = 'Resetting...';
+
+        const response = await fetch('/api/auth/reset-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, newPassword })
+        });
+
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          throw new Error(data.error || 'Password reset failed.');
+        }
+
+        showToast(data.message || 'Password reset successfully! Redirecting to login...', 'success');
+        forgotModal.style.display = 'none';
+        document.getElementById('forgot-password-form').reset();
+
+        setTimeout(() => {
+          window.location.href = 'login.html?email=' + encodeURIComponent(email);
+        }, 1000);
+      } catch (err) {
+        errorEl.textContent = err.message;
+        errorEl.style.display = 'block';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Reset Password & Log In';
       }
     });
   </script>

@@ -8,3 +8,4 @@ yarn-error.log*
 Thumbs.db
 uploads/*
 !uploads/.gitkeep
+USER_PROMPTS_HISTORY.md

@@ -14,9 +14,11 @@ const SECRET = process.env.JWT_SECRET || 'soniviva-fallback-secret-key';
 // POST /api/auth/register
 router.post('/register', (req, res) => {
   try {
-    const { name, email, phone, password } = req.body;
+    const { name, email, phone, password } = req.body || {};
+    const cleanEmail = (email || '').toLowerCase().trim();
+    const cleanName = (name || '').trim();
 
-    if (!name || !email || !password) {
+    if (!cleanName || !cleanEmail || !password) {
       return res.status(400).json({ error: 'Name, email, and password are required' });
     }
     if (password.length < 8) {
@@ -25,21 +27,23 @@ router.post('/register', (req, res) => {
     if (!/[A-Z]/.test(password) || !/[0-9]/.test(password)) {
       return res.status(400).json({ error: 'Password must contain at least one uppercase letter and one number' });
     }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
       return res.status(400).json({ error: 'Invalid email address' });
     }
 
     const db = getDb();
-    const existing = db.prepare('SELECT id FROM users WHERE email = ?').get(email.toLowerCase());
+    const existing = db.prepare('SELECT id FROM users WHERE LOWER(TRIM(email)) = ?').get(cleanEmail);
     if (existing) {
-      return res.status(409).json({ error: 'An account with this email already exists' });
+      return res.status(409).json({
+        error: 'This email is already registered. If you have forgotten your password, please use the Forgot Password option to reset it.',
+        code: 'EMAIL_ALREADY_REGISTERED',
+        email: cleanEmail
+      });
     }
 
     const hash = bcrypt.hashSync(password, 12);
-    const cleanEmail = email.toLowerCase().trim();
-    const cleanName = name.trim();
 
-    const result = db.prepare('INSERT INTO users (name, email, phone, password_hash, role) VALUES (?, ?, ?, ?, ?)').run(cleanName, cleanEmail, phone || '', hash, 'user');
+    const result = db.prepare('INSERT INTO users (name, email, phone, password_hash, role) VALUES (?, ?, ?, ?, ?)').run(cleanName, cleanEmail, (phone || '').trim(), hash, 'user');
 
     const userId = result.lastInsertRowid;
 
@@ -58,10 +62,17 @@ router.post('/register', (req, res) => {
         name: cleanName,
         email: cleanEmail,
         role: 'user',
-        phone: phone || ''
+        phone: (phone || '').trim()
       }
     });
   } catch (err) {
+    if (err.message && err.message.includes('UNIQUE constraint failed: users.email')) {
+      return res.status(409).json({
+        error: 'This email is already registered. If you have forgotten your password, please use the Forgot Password option to reset it.',
+        code: 'EMAIL_ALREADY_REGISTERED',
+        email: (req.body?.email || '').toLowerCase().trim()
+      });
+    }
     console.error('Register error:', err);
     res.status(500).json({ error: err.message || 'Registration failed. Please try again.' });
   }
@@ -112,16 +123,21 @@ router.post('/logout', (req, res) => {
 // POST /api/auth/reset-password
 router.post('/reset-password', (req, res) => {
   try {
-    const { email, newPassword } = req.body;
-    if (!email || !newPassword) {
+    const { email, newPassword } = req.body || {};
+    const cleanEmail = (email || '').toLowerCase().trim();
+
+    if (!cleanEmail || !newPassword) {
       return res.status(400).json({ error: 'Email and new password are required' });
     }
     if (newPassword.length < 8) {
       return res.status(400).json({ error: 'Password must be at least 8 characters' });
     }
+    if (!/[A-Z]/.test(newPassword) || !/[0-9]/.test(newPassword)) {
+      return res.status(400).json({ error: 'Password must contain at least one uppercase letter and one number' });
+    }
 
     const db = getDb();
-    const user = db.prepare('SELECT id FROM users WHERE email = ?').get(email.toLowerCase().trim());
+    const user = db.prepare('SELECT id FROM users WHERE LOWER(TRIM(email)) = ?').get(cleanEmail);
     if (!user) {
       return res.status(404).json({ error: 'No account found with this email' });
     }
