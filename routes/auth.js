@@ -120,34 +120,97 @@ router.post('/logout', (req, res) => {
   res.json({ message: 'Logged out successfully' });
 });
 
-// POST /api/auth/reset-password
-router.post('/reset-password', (req, res) => {
+// POST /api/auth/forgot-password — Send 6-digit OTP to user's email
+router.post('/forgot-password', async (req, res) => {
   try {
-    const { email, newPassword } = req.body || {};
+    const { email } = req.body || {};
     const cleanEmail = (email || '').toLowerCase().trim();
 
-    if (!cleanEmail || !newPassword) {
-      return res.status(400).json({ error: 'Email and new password are required' });
+    if (!cleanEmail) {
+      return res.status(400).json({ error: 'Email address is required' });
     }
+
+    const db = getDb();
+    const user = db.prepare('SELECT id, name, email FROM users WHERE LOWER(TRIM(email)) = ?').get(cleanEmail);
+    if (!user) {
+      return res.status(404).json({ error: 'No account found with this email address.' });
+    }
+
+    // Generate secure random 6-digit code
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString();
+
+    // Clear previous codes for this email and save new one
+    db.prepare('DELETE FROM password_resets WHERE LOWER(TRIM(email)) = ?').run(cleanEmail);
+    db.prepare('INSERT INTO password_resets (email, code, expires_at) VALUES (?, ?, ?)').run(cleanEmail, code, expiresAt);
+
+    // Send email with OTP code
+    const { sendPasswordResetOtp } = require('../utils/email');
+    await sendPasswordResetOtp(cleanEmail, code);
+
+    res.json({
+      message: `A 6-digit verification code has been sent to ${cleanEmail}. Please check your inbox.`,
+      email: cleanEmail
+    });
+  } catch (err) {
+    console.error('Forgot password error:', err);
+    res.status(500).json({ error: 'Failed to send verification code. Please try again.' });
+  }
+});
+
+// POST /api/auth/reset-password — Verify OTP code and reset password
+router.post('/reset-password', (req, res) => {
+  try {
+    const { email, code, newPassword } = req.body || {};
+    const cleanEmail = (email || '').toLowerCase().trim();
+    const cleanCode = (code || '').toString().trim();
+
+    if (!cleanEmail || !newPassword) {
+      return res.status(400).json({ error: 'Email and new password are required.' });
+    }
+
+    if (!cleanCode) {
+      return res.status(400).json({ error: 'Verification code is required.' });
+    }
+
     if (newPassword.length < 8) {
-      return res.status(400).json({ error: 'Password must be at least 8 characters' });
+      return res.status(400).json({ error: 'Password must be at least 8 characters.' });
     }
     if (!/[A-Z]/.test(newPassword) || !/[0-9]/.test(newPassword)) {
-      return res.status(400).json({ error: 'Password must contain at least one uppercase letter and one number' });
+      return res.status(400).json({ error: 'Password must contain at least one uppercase letter and one number.' });
     }
 
     const db = getDb();
     const user = db.prepare('SELECT id FROM users WHERE LOWER(TRIM(email)) = ?').get(cleanEmail);
     if (!user) {
-      return res.status(404).json({ error: 'No account found with this email' });
+      return res.status(404).json({ error: 'No account found with this email address.' });
     }
 
+    // Verify OTP code and check 15-minute expiration
+    const nowIso = new Date().toISOString();
+    const resetRecord = db.prepare(`
+      SELECT * FROM password_resets 
+      WHERE LOWER(TRIM(email)) = ? AND code = ? AND expires_at > ?
+      ORDER BY id DESC LIMIT 1
+    `).get(cleanEmail, cleanCode, nowIso);
+
+    if (!resetRecord) {
+      return res.status(400).json({
+        error: 'Invalid or expired verification code. Please check the code or request a new one.'
+      });
+    }
+
+    // Update password hash
     const hash = bcrypt.hashSync(newPassword, 12);
     db.prepare('UPDATE users SET password_hash = ? WHERE id = ?').run(hash, user.id);
-    res.json({ message: 'Password reset successfully. Please log in with your new password.' });
+
+    // Invalidate consumed OTP
+    db.prepare('DELETE FROM password_resets WHERE LOWER(TRIM(email)) = ?').run(cleanEmail);
+
+    res.json({ message: 'Password reset successfully! Please log in with your new password.' });
   } catch (err) {
     console.error('Reset error:', err);
-    res.status(500).json({ error: 'Password reset failed.' });
+    res.status(500).json({ error: 'Password reset failed. Please try again.' });
   }
 });
 
