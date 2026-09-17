@@ -177,29 +177,44 @@ async function initDatabase() {
     console.log('✅ Database initialized with schema and seed data');
   }
 
-  // Ensure the primary admin account exists and has the requested credentials
-  syncAdminUser();
+  // Ensure default accounts exist with updated credentials
+  syncDefaultUsers();
 
   return db;
 }
 
-// ─── Ensure admin account exists with updated credentials ───
-function syncAdminUser() {
+// ─── Ensure default accounts exist with updated credentials ───
+function syncDefaultUsers() {
   if (!db) return;
+  // 1. Admin account
   const adminEmail = 'dappahsonnia@gmail.com';
   const adminPass = 'Sonnita0275';
   const adminHash = bcrypt.hashSync(adminPass, 12);
-  const existing = db.prepare('SELECT id, role FROM users WHERE email = ?').get(adminEmail);
+  const existingAdmin = db.prepare('SELECT id, role FROM users WHERE email = ?').get(adminEmail);
 
-  if (existing) {
+  if (existingAdmin) {
     db.prepare('UPDATE users SET role = ?, password_hash = ?, name = ? WHERE id = ?')
-      .run('admin', adminHash, 'Sonnia Dappah (Admin)', existing.id);
+      .run('admin', adminHash, 'Sonnia Dappah (Admin)', existingAdmin.id);
     console.log('🔑 Admin account synced for:', adminEmail);
   } else {
     db.prepare('INSERT INTO users (name, email, phone, password_hash, role, city, region) VALUES (?, ?, ?, ?, ?, ?, ?)')
       .run('Sonnia Dappah (Admin)', adminEmail, '+233 24 123 4567', adminHash, 'admin', 'Accra', 'Greater Accra');
     console.log('🔑 Created primary admin account for:', adminEmail);
   }
+
+  // 2. Default customer account (Blessing Amoah Takyi)
+  const blessingEmail = 'blessingoamoahtakyi@gmail.com';
+  const existingBlessing = db.prepare('SELECT id, role FROM users WHERE LOWER(TRIM(email)) = ?').get(blessingEmail);
+  if (!existingBlessing) {
+    const blessingHash = bcrypt.hashSync('Blessing123', 10);
+    db.prepare('INSERT INTO users (name, email, phone, password_hash, role, city, region) VALUES (?, ?, ?, ?, ?, ?, ?)')
+      .run('Blessing Amoah Takyi', blessingEmail, '+233 24 123 4567', blessingHash, 'user', 'Accra', 'Greater Accra');
+    console.log('👤 Seeded customer account for:', blessingEmail);
+  }
+}
+
+function syncAdminUser() {
+  syncDefaultUsers();
 }
 
 // ─── Create tables ───
@@ -302,6 +317,11 @@ function seedData() {
   const adminHash = bcrypt.hashSync('Sonnita0275', 12);
   db.prepare(`INSERT INTO users (name, email, phone, password_hash, role, city, region) VALUES (?, ?, ?, ?, ?, ?, ?)`)
     .run('Sonnia Dappah (Admin)', 'dappahsonnia@gmail.com', '+233 24 123 4567', adminHash, 'admin', 'Accra', 'Greater Accra');
+
+  // ── Customer account ──
+  const blessingHash = bcrypt.hashSync('Blessing123', 10);
+  db.prepare(`INSERT OR IGNORE INTO users (name, email, phone, password_hash, role, city, region) VALUES (?, ?, ?, ?, ?, ?, ?)`)
+    .run('Blessing Amoah Takyi', 'blessingoamoahtakyi@gmail.com', '+233 24 123 4567', blessingHash, 'user', 'Accra', 'Greater Accra');
 
   // ── Categories ──
   const categories = [
