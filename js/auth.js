@@ -69,23 +69,23 @@ function updateAuthNav() {
   const user = getUser();
   const loggedIn = isLoggedIn();
   
-  // 1. Rebuild desktop nav-actions (hidden on mobile via CSS)
+  // 1. Rebuild desktop & mobile nav-actions
   let desktopAuthHtml = '<div class="desktop-auth-links">';
   if (loggedIn && user) {
     if (isAdmin()) {
-      desktopAuthHtml += `<a href="/admin/" class="btn btn-sm btn-outline" style="margin-right: 8px;">Admin</a>`;
+      desktopAuthHtml += `<a href="/admin/" class="btn btn-sm btn-outline" style="margin-right: 6px;">Admin</a>`;
     }
     const displayName = (user.name || 'Account').split(' ')[0];
     desktopAuthHtml += `
-      <a href="profile.html" style="font-weight: 500; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 6px;">
-        <span style="font-size: 1.05rem;">👤</span> Hi, ${escapeHtml(displayName)}
+      <a href="profile.html" class="nav-profile-link" style="font-weight: 600; font-size: 0.88rem; display: inline-flex; align-items: center; gap: 4px;">
+        <span style="font-size: 1rem;">👤</span> <span class="nav-user-name">${escapeHtml(displayName)}</span>
       </a>
-      <a href="#" onclick="logout(); return false;" style="font-size: 0.9rem; color: var(--text-muted);">Logout</a>
+      <a href="#" onclick="logout(); return false;" class="nav-logout-btn" style="font-size: 0.84rem; color: var(--text-muted); margin-left: 4px;">Logout</a>
     `;
   } else {
     desktopAuthHtml += `
-      <a href="login.html" style="font-size: 0.9rem; font-weight: 500;">Login</a>
-      <a href="register.html" class="btn btn-sm btn-primary">Register</a>
+      <a href="login.html" class="nav-login-link" style="font-size: 0.88rem; font-weight: 600; color: var(--text);">Login</a>
+      <a href="register.html" class="btn btn-sm btn-primary nav-register-btn" style="border-radius: 50px;">Register</a>
     `;
   }
   desktopAuthHtml += '</div>';
@@ -211,16 +211,146 @@ function escapeHtml(str) {
     .replace(/'/g, '&#039;');
 }
 
+// ==========================================
+// Mandatory Login Protection & Click Gate
+// "When a user clicks on anything on the site apart from story,
+// he or she should log in first to proceed"
+// ==========================================
+
+const PUBLIC_PAGES = [
+  'index.html', '',
+  'about.html', 'about',
+  'login.html', 'login',
+  'register.html', 'register'
+];
+
+function getCurrentPageName() {
+  const cleanPath = (window.location.pathname || '').replace(/\\/g, '/');
+  const page = cleanPath.split('/').pop().toLowerCase() || 'index.html';
+  return page;
+}
+
+function enforcePageProtection() {
+  const currentPage = getCurrentPageName();
+  // If page is not in public pages list, user must log in
+  if (!PUBLIC_PAGES.includes(currentPage) && !isLoggedIn()) {
+    const destination = currentPage + (window.location.search || '');
+    window.location.replace(`login.html?redirect=${encodeURIComponent(destination)}&msg=login_required`);
+  }
+}
+
+// Run immediately upon script evaluation so unauthorized pages redirect without delay
+enforcePageProtection();
+
 function requireAuth() {
   if (!isLoggedIn()) {
-    window.location.href = 'login.html';
+    const target = getCurrentPageName() + (window.location.search || '');
+    window.location.replace(`login.html?redirect=${encodeURIComponent(target)}&msg=login_required`);
   }
 }
 
 function requireAdmin() {
   if (!isAdmin()) {
-    window.location.href = 'login.html';
+    window.location.replace('login.html?msg=admin_required');
   }
 }
 
-document.addEventListener('DOMContentLoaded', updateAuthNav);
+function initLoginGateInterceptor() {
+  document.addEventListener('click', function(e) {
+    // Logged-in users have unrestricted access
+    if (isLoggedIn()) return;
+
+    // Find closest interactive element: link, button, card
+    const clickable = e.target.closest('a, button, .product-card, .category-card');
+    if (!clickable) return;
+
+    // Allowed without login:
+    // 1. Mobile menu toggle button
+    if (clickable.classList.contains('mobile-toggle') || clickable.closest('.mobile-toggle')) {
+      return;
+    }
+
+    // 2. Modal close buttons or password visibility toggles
+    if (clickable.getAttribute('onclick')?.includes('close') || 
+        clickable.getAttribute('onclick')?.includes('Modal') || 
+        clickable.id?.includes('close') ||
+        clickable.classList.contains('password-toggle-btn') ||
+        clickable.classList.contains('toast-close')) {
+      return;
+    }
+
+    // 3. Form submission or buttons inside login.html and register.html
+    const currentPage = getCurrentPageName();
+    if (currentPage === 'login.html' || currentPage === 'register.html') {
+      return;
+    }
+
+    const href = clickable.getAttribute('href') || '';
+    const hrefClean = href.toLowerCase().trim();
+    const textClean = clickable.textContent.trim().toLowerCase();
+
+    // 4. "Our Story" is explicitly exempt ("apart from story")
+    const isStory = hrefClean.includes('about.html') || 
+                    hrefClean === 'about.html' ||
+                    textClean === 'our story' ||
+                    textClean === 'about' ||
+                    textClean.includes('our story');
+
+    if (isStory) {
+      return; // Allowed!
+    }
+
+    // 5. Auth links (Login / Register) are allowed
+    const isAuth = hrefClean.includes('login.html') || 
+                   hrefClean.includes('register.html') ||
+                   textClean === 'login' || 
+                   textClean === 'register';
+
+    if (isAuth) {
+      return; // Allowed!
+    }
+
+    // 6. Clicking logo to return to home is allowed
+    if (clickable.classList.contains('nav-logo') || clickable.closest('.nav-logo')) {
+      if (hrefClean === 'index.html' || hrefClean === '/' || hrefClean === '') {
+        return;
+      }
+    }
+
+    // All other clicks across the site apart from story require logging in first!
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Determine target destination
+    let target = 'shop.html';
+    if (href && !href.startsWith('#') && !href.startsWith('javascript:')) {
+      target = href;
+    } else if (clickable.closest('.product-card')) {
+      const pLink = clickable.closest('.product-card').querySelector('a[href*="product.html"]');
+      if (pLink && pLink.getAttribute('href')) target = pLink.getAttribute('href');
+    } else if (clickable.closest('.category-card')) {
+      const cLink = clickable.closest('.category-card').querySelector('a[href*="shop.html"]') || clickable;
+      if (cLink && cLink.getAttribute('href')) target = cLink.getAttribute('href');
+    } else if (clickable.classList.contains('cart-link') || clickable.closest('.cart-link')) {
+      target = 'cart.html';
+    }
+
+    if (typeof showToast === 'function') {
+      showToast('Please log in first to proceed.', 'info');
+    }
+
+    setTimeout(() => {
+      window.location.href = `login.html?redirect=${encodeURIComponent(target)}&msg=login_required`;
+    }, 300);
+  }, true); // Capture phase
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    updateAuthNav();
+    initLoginGateInterceptor();
+  });
+} else {
+  updateAuthNav();
+  initLoginGateInterceptor();
+}

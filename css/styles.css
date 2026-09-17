@@ -1927,8 +1927,25 @@ body {
 
 /* ─── Breakpoint: Tablets Portrait & Phablets (max-width: 992px) ─── */
 @media (max-width: 992px) {
+  .nav-actions {
+    gap: 12px;
+  }
   .desktop-auth-links {
-    display: none !important;
+    display: inline-flex !important;
+    align-items: center;
+    gap: 10px;
+  }
+  .desktop-auth-links a.nav-login-link {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text);
+    padding: 4px 6px;
+  }
+  .desktop-auth-links a.nav-register-btn {
+    padding: 6px 14px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    border-radius: var(--radius-full);
   }
   .nav-links {
     position: fixed;
@@ -2459,18 +2476,45 @@ body {
     padding: 0 12px;
   }
   .nav-container {
-    padding: 0 12px;
+    padding: 0 10px;
+    gap: 6px;
   }
   .nav-logo {
-    font-size: 1.25rem;
-    letter-spacing: 1px;
+    font-size: 1.15rem;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
   }
   .nav-actions {
-    gap: 12px;
+    gap: 6px;
+    margin-left: auto;
+  }
+  .desktop-auth-links {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 6px;
+  }
+  .desktop-auth-links a.nav-login-link {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text);
+    padding: 3px 5px;
+  }
+  .desktop-auth-links a.nav-register-btn {
+    padding: 5px 11px;
+    font-size: 0.76rem;
+    font-weight: 600;
+    border-radius: var(--radius-full);
+  }
+  .desktop-auth-links .nav-user-name {
+    display: none;
   }
   .cart-link {
     width: 36px;
     height: 36px;
+  }
+  .cart-link svg {
+    width: 18px;
+    height: 18px;
   }
   .cart-count {
     width: 17px;
@@ -2478,6 +2522,12 @@ body {
     font-size: 0.65rem;
     top: -3px;
     right: -3px;
+  }
+  .mobile-toggle {
+    width: 36px;
+    height: 36px;
+    padding: 6px;
+    margin-left: 2px;
   }
   .hero-content h1 {
     font-size: 1.7rem;
@@ -2611,6 +2661,28 @@ body {
 
 /* ─── Breakpoint: Ultra-Narrow Devices (max-width: 340px) ─── */
 @media (max-width: 340px) {
+  .nav-logo {
+    font-size: 1.05rem;
+  }
+  .desktop-auth-links {
+    gap: 4px;
+  }
+  .desktop-auth-links a.nav-login-link {
+    font-size: 0.75rem;
+    padding: 2px;
+  }
+  .desktop-auth-links a.nav-register-btn {
+    padding: 4px 8px;
+    font-size: 0.72rem;
+  }
+  .cart-link {
+    width: 32px;
+    height: 32px;
+  }
+  .mobile-toggle {
+    width: 32px;
+    height: 32px;
+  }
   .categories-grid {
     grid-template-columns: 1fr;
   }

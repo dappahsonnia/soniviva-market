@@ -18,7 +18,7 @@
         <li><a href="index.html">Home</a></li>
         <li><a href="shop.html">Shop</a></li>
         <li><a href="hampers.html">Food Hampers</a></li>
-        <li><a href="about.html">About</a></li>
+        <li><a href="about.html">Our Story</a></li>
         <li><a href="contact.html">Contact</a></li>
       </ul>
       <div class="nav-actions"></div>
@@ -204,7 +204,11 @@
           if (response.status === 409 || data.code === 'EMAIL_ALREADY_REGISTERED' || (data.error && /already (exists|registered)/i.test(data.error))) {
             if (emailExistsBox) {
               existsEmailText.textContent = email;
-              loginLinkBtn.href = 'login.html?email=' + encodeURIComponent(email);
+              const urlParams = new URLSearchParams(window.location.search);
+              const redirect = urlParams.get('redirect');
+              let loginUrl = 'login.html?email=' + encodeURIComponent(email);
+              if (redirect) loginUrl += '&redirect=' + encodeURIComponent(redirect);
+              loginLinkBtn.href = loginUrl;
               emailExistsBox.style.display = 'block';
               emailExistsBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             }
@@ -221,7 +225,13 @@
         showToast(`Welcome to Soniviva, ${name}! 🎉`, 'success');
 
         setTimeout(() => {
-          window.location.href = 'index.html';
+          const urlParams = new URLSearchParams(window.location.search);
+          const redirect = urlParams.get('redirect');
+          if (redirect && !redirect.startsWith('//') && !redirect.startsWith('http')) {
+            window.location.href = redirect;
+          } else {
+            window.location.href = 'index.html';
+          }
         }, 700);
       } catch (err) {
         showToast(err.message, 'error');
@@ -304,13 +314,28 @@
         showToast(`Welcome, ${data.user.name}! 🎉`, 'success');
 
         setTimeout(() => {
-          window.location.href = 'index.html';
+          const urlParams = new URLSearchParams(window.location.search);
+          const redirect = urlParams.get('redirect');
+          if (redirect && !redirect.startsWith('//') && !redirect.startsWith('http')) {
+            window.location.href = redirect;
+          } else {
+            window.location.href = 'index.html';
+          }
         }, 700);
       } catch (err) {
         showToast(err.message, 'error');
       }
     }
 
+    // Preserve redirect param in "Login here" footer link
+    const urlParams = new URLSearchParams(window.location.search);
+    const redirectParam = urlParams.get('redirect');
+    if (redirectParam) {
+      const loginLink = document.querySelector('.auth-footer a[href*="login"]');
+      if (loginLink) {
+        loginLink.href = 'login.html?redirect=' + encodeURIComponent(redirectParam);
+      }
+    }
 
     window.addEventListener('load', () => {
       initGoogleAuth();
