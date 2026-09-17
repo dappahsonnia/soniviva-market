@@ -190,12 +190,18 @@ function syncDefaultUsers() {
   const adminEmail = 'dappahsonnia@gmail.com';
   const adminPass = 'Sonnita0275';
   const adminHash = bcrypt.hashSync(adminPass, 12);
-  const existingAdmin = db.prepare('SELECT id, role FROM users WHERE email = ?').get(adminEmail);
+  const existingAdmin = db.prepare('SELECT id, role, password_hash FROM users WHERE LOWER(TRIM(email)) = ?').get(adminEmail);
 
   if (existingAdmin) {
-    db.prepare('UPDATE users SET role = ?, password_hash = ?, name = ? WHERE id = ?')
-      .run('admin', adminHash, 'Sonnia Dappah (Admin)', existingAdmin.id);
-    console.log('🔑 Admin account synced for:', adminEmail);
+    // Preserve admin role and existing password (do not overwrite if admin changed/reset their password)
+    if (!existingAdmin.password_hash) {
+      db.prepare('UPDATE users SET role = ?, password_hash = ?, name = ? WHERE id = ?')
+        .run('admin', adminHash, 'Sonnia Dappah (Admin)', existingAdmin.id);
+    } else {
+      db.prepare("UPDATE users SET role = 'admin', name = COALESCE(NULLIF(name, ''), 'Sonnia Dappah (Admin)') WHERE id = ?")
+        .run(existingAdmin.id);
+    }
+    console.log('🔑 Admin account verified for:', adminEmail);
   } else {
     db.prepare('INSERT INTO users (name, email, phone, password_hash, role, city, region) VALUES (?, ?, ?, ?, ?, ?, ?)')
       .run('Sonnia Dappah (Admin)', adminEmail, '+233 24 123 4567', adminHash, 'admin', 'Accra', 'Greater Accra');

