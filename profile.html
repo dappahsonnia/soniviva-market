@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
   <title>My Profile — SONIVIVA</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -136,10 +136,10 @@
   </div>
 
   <!-- Order Details Modal -->
-  <div id="order-modal" style="display:none; position:fixed; inset:0; z-index:10000; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; padding:20px;">
-    <div style="background:#fff; border-radius:16px; padding:32px; max-width:550px; width:100%; max-height:85vh; overflow-y:auto; box-shadow:0 8px 40px rgba(0,0,0,0.15); position:relative;">
-      <button onclick="closeOrderModal()" style="position:absolute; top:16px; right:20px; background:none; border:none; font-size:1.5rem; cursor:pointer; color:#999;">&times;</button>
-      <h3 id="modal-order-number" style="margin-bottom:8px; font-family:'Playfair Display',serif; font-size:1.3rem;">Order Details</h3>
+  <div id="order-modal" style="display:none; position:fixed; inset:0; z-index:10000; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; padding:12px; box-sizing:border-box;">
+    <div style="background:#fff; border-radius:16px; padding:24px 18px; width:min(100%, 550px); max-height:calc(100vh - 24px); max-height:calc(100dvh - 24px); overflow-y:auto; -webkit-overflow-scrolling:touch; box-shadow:0 8px 40px rgba(0,0,0,0.15); position:relative; box-sizing:border-box;">
+      <button onclick="closeOrderModal()" style="position:absolute; top:14px; right:16px; background:none; border:none; font-size:1.5rem; cursor:pointer; color:#999;">&times;</button>
+      <h3 id="modal-order-number" style="margin-bottom:8px; font-family:'Playfair Display',serif; font-size:1.25rem;">Order Details</h3>
       <div id="modal-order-body" style="margin-top:16px;"></div>
     </div>
   </div>

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
   <title>Login — SONIVIVA</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -66,10 +66,22 @@
           <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
             <input type="checkbox" name="remember" style="width: auto;"> Remember me
           </label>
-          <a href="#" id="forgot-password-link">Forgot Password?</a>
         </div>
         
         <button type="submit" class="btn btn-primary">Login</button>
+
+        <!-- Dynamic Password Recovery Box (Activated ONLY when incorrect password is submitted) -->
+        <div id="wrong-password-box" style="display:none; background:#FFF8E1; border:1px solid #FFE082; border-radius:10px; padding:14px 16px; margin-top:16px; text-align:center;">
+          <div style="display:flex; align-items:center; justify-content:center; gap:8px; color:#D84315; font-weight:600; font-size:0.9rem; margin-bottom:6px;">
+            <span>⚠️</span> <span>Incorrect password entered</span>
+          </div>
+          <p style="color:#6D4C41; font-size:0.84rem; margin-bottom:12px; line-height:1.4;">
+            Forgotten your password? You can reset it now with a 6-digit email verification code.
+          </p>
+          <button type="button" id="forgot-password-btn" class="btn btn-sm btn-outline" style="width:100%; border-color:#D84315; color:#D84315; padding:10px 14px; font-size:0.88rem; font-weight:600; background:#fff;">
+            🔑 Reset Forgotten Password
+          </button>
+        </div>
       </form>
       
       <div class="auth-footer">
@@ -79,8 +91,8 @@
   </div>
 
   <!-- Forgot Password Modal (2-Step OTP Verification) -->
-  <div id="forgot-password-modal" style="display:none; position:fixed; inset:0; z-index:10000; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; padding:20px;">
-    <div style="background:#fff; border-radius:16px; padding:36px 32px; max-width:440px; width:100%; box-shadow:0 8px 40px rgba(0,0,0,0.15); position:relative;">
+  <div id="forgot-password-modal" style="display:none; position:fixed; inset:0; z-index:10000; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; padding:12px; box-sizing:border-box;">
+    <div style="background:#fff; border-radius:16px; padding:28px 20px; width:min(100%, 440px); max-height:calc(100vh - 24px); overflow-y:auto; -webkit-overflow-scrolling:touch; box-shadow:0 8px 40px rgba(0,0,0,0.15); position:relative; box-sizing:border-box;">
       <button id="close-forgot-modal" type="button" style="position:absolute; top:12px; right:16px; background:none; border:none; font-size:1.5rem; cursor:pointer; color:#999;">&times;</button>
       
       <!-- Step 1: Request Code -->
@@ -286,12 +298,25 @@
           body: JSON.stringify({ email, password })
         });
         
+        const data = await response.json().catch(() => ({}));
+
         if (!response.ok) {
-          const data = await response.json().catch(() => ({}));
+          // If the password was wrong, enable and display the forgot password recovery option!
+          if (data.wrongPassword) {
+            hasEnteredWrongPassword = true;
+            wrongPasswordEmail = email;
+            const wrongBox = document.getElementById('wrong-password-box');
+            if (wrongBox) {
+              wrongBox.style.display = 'block';
+              wrongBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+          }
           throw new Error(data.error || data.message || 'Login failed. Please check your credentials.');
         }
         
-        const data = await response.json();
+        const wrongBox = document.getElementById('wrong-password-box');
+        if (wrongBox) wrongBox.style.display = 'none';
+
         localStorage.setItem('soniviva_token', data.token);
         localStorage.setItem('soniviva_user', JSON.stringify(data.user));
         
@@ -324,6 +349,9 @@
     const sendCodeBtn = document.getElementById('send-code-btn');
     const verifyResetBtn = document.getElementById('verify-reset-btn');
 
+    let hasEnteredWrongPassword = false;
+    let wrongPasswordEmail = '';
+
     function resetForgotModal() {
       step1.style.display = 'block';
       step2.style.display = 'none';
@@ -334,13 +362,21 @@
       document.getElementById('forgot-verify-reset-form')?.reset();
     }
 
-    document.getElementById('forgot-password-link')?.addEventListener('click', (e) => {
-      e.preventDefault();
+    function openForgotModal() {
+      if (!hasEnteredWrongPassword) {
+        showToast('Please attempt login with your password first. If incorrect, the reset option is enabled.', 'info');
+        return;
+      }
       resetForgotModal();
-      const currentEmail = document.getElementById('email')?.value.trim();
+      const currentEmail = wrongPasswordEmail || document.getElementById('email')?.value.trim();
       if (currentEmail) resetEmailInput.value = currentEmail;
       forgotModal.style.display = 'flex';
       resetEmailInput.focus();
+    }
+
+    document.getElementById('forgot-password-btn')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      openForgotModal();
     });
 
     document.getElementById('close-forgot-modal')?.addEventListener('click', () => {
@@ -354,6 +390,10 @@
     // Step 1: Send OTP code
     document.getElementById('forgot-request-code-form')?.addEventListener('submit', async (e) => {
       e.preventDefault();
+      if (!hasEnteredWrongPassword) {
+        showToast('Forgot password is only available after an incorrect password attempt.', 'error');
+        return;
+      }
       const email = resetEmailInput.value.trim();
       step1Error.style.display = 'none';
 
@@ -498,18 +538,19 @@
       }
     });
 
-    // Auto-open forgot modal or pre-fill email if passed via query params
+    // Handle query params
     const urlParams = new URLSearchParams(window.location.search);
     const prefillEmail = urlParams.get('email');
     if (prefillEmail) {
       const emailInput = document.getElementById('email');
       if (emailInput) emailInput.value = prefillEmail;
-      if (resetEmailInput) resetEmailInput.value = prefillEmail;
+      const pwdInput = document.getElementById('password');
+      if (pwdInput) pwdInput.focus();
     }
     if (urlParams.get('forgot') === '1' || urlParams.get('forgot') === 'true') {
-      resetForgotModal();
-      forgotModal.style.display = 'flex';
-      resetEmailInput.focus();
+      showToast('Please enter your password to log in. If incorrect, the reset option will be activated.', 'info');
+      const pwdInput = document.getElementById('password');
+      if (pwdInput) pwdInput.focus();
     }
   </script>
 </body>

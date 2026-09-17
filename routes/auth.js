@@ -93,7 +93,11 @@ router.post('/login', (req, res) => {
     }
 
     if (!bcrypt.compareSync(password, user.password_hash)) {
-      return res.status(401).json({ error: 'Invalid email or password' });
+      return res.status(401).json({
+        error: 'Incorrect password. Forgotten your password? You can reset it below.',
+        wrongPassword: true,
+        email: email.toLowerCase().trim()
+      });
     }
 
     const token = jwt.sign(
