@@ -86,10 +86,51 @@ router.post('/login', (req, res) => {
       return res.status(400).json({ error: 'Email and password are required' });
     }
 
+    const cleanEmail = email.toLowerCase().trim();
     const db = getDb();
-    const user = db.prepare('SELECT * FROM users WHERE LOWER(TRIM(email)) = ?').get(email.toLowerCase().trim());
+    const user = db.prepare('SELECT * FROM users WHERE LOWER(TRIM(email)) = ?').get(cleanEmail);
+
     if (!user) {
-      return res.status(401).json({ error: 'Invalid email or password' });
+      // User does not exist yet — allow them to sign in through email directly without having to register first!
+      if (password.length < 8) {
+        return res.status(400).json({ error: 'Password must be at least 8 characters' });
+      }
+      if (!/[A-Z]/.test(password) || !/[0-9]/.test(password)) {
+        return res.status(400).json({ error: 'Password must contain at least one uppercase letter and one number' });
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+        return res.status(400).json({ error: 'Invalid email address' });
+      }
+
+      const displayName = cleanEmail.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+      const hash = bcrypt.hashSync(password, 12);
+      const role = cleanEmail === 'dappahsonnia@gmail.com' ? 'admin' : 'user';
+
+      const insertResult = db.prepare('INSERT INTO users (name, email, phone, password_hash, role) VALUES (?, ?, ?, ?, ?)').run(
+        displayName, cleanEmail, '', hash, role
+      );
+
+      const newUser = {
+        id: insertResult.lastInsertRowid,
+        name: displayName,
+        email: cleanEmail,
+        role,
+        phone: ''
+      };
+
+      const token = jwt.sign(
+        { id: newUser.id, email: newUser.email, role: newUser.role, name: newUser.name },
+        SECRET,
+        { expiresIn: '7d' }
+      );
+
+      res.cookie('token', token, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 });
+      return res.status(200).json({
+        message: 'Account created and signed in successfully! Welcome to Soniviva Market.',
+        token,
+        user: newUser,
+        autoCreated: true
+      });
     }
 
     if (!bcrypt.compareSync(password, user.password_hash)) {
