@@ -100,7 +100,36 @@
     </div>
   </div>
 
+  <!-- Google Sign-Up Modal -->
+  <div id="google-signup-modal" style="display:none; position:fixed; inset:0; z-index:10000; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; padding:12px; box-sizing:border-box;">
+    <div style="background:#fff; border-radius:16px; padding:28px 22px; width:min(100%, 420px); max-height:calc(100vh - 24px); box-shadow:0 8px 40px rgba(0,0,0,0.15); position:relative; box-sizing:border-box; text-align:center;">
+      <button id="close-google-modal" type="button" onclick="closeGoogleModal()" style="position:absolute; top:12px; right:16px; background:none; border:none; font-size:1.5rem; cursor:pointer; color:#999;">&times;</button>
+      
+      <div style="width:52px; height:52px; border-radius:50%; background:#F8F9FA; display:flex; align-items:center; justify-content:center; margin:0 auto 14px; box-shadow:0 2px 8px rgba(0,0,0,0.08); border:1px solid #eee;">
+        <svg width="26" height="26" viewBox="0 0 24 24">
+          <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/>
+          <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"/>
+          <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+          <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+        </svg>
+      </div>
 
+      <h3 style="font-size:1.25rem; font-weight:700; margin-bottom:6px; color:#2D2D2D;">Continue with Google</h3>
+      <p style="color:#6B6B6B; font-size:0.86rem; margin-bottom:20px; line-height:1.45;">
+        Enter your Google or Gmail address to create your account or sign in:
+      </p>
+
+      <form id="google-direct-form" onsubmit="handleGoogleDirectSubmit(event)">
+        <div style="margin-bottom:16px; text-align:left;">
+          <label for="google-direct-email" style="display:block; font-size:0.82rem; font-weight:600; margin-bottom:6px; color:#444;">Google Email Address</label>
+          <input type="email" id="google-direct-email" required placeholder="name@gmail.com" style="width:100%; padding:12px 14px; border:1px solid #ddd; border-radius:8px; font-size:0.95rem; box-sizing:border-box; background:#FAF9F6;">
+        </div>
+        <button type="submit" id="google-direct-btn" class="btn btn-primary" style="width:100%; padding:12px; font-weight:600; font-size:0.95rem;">
+          Continue with Google →
+        </button>
+      </form>
+    </div>
+  </div>
 
   <footer class="footer">
     <div class="container">
@@ -259,6 +288,65 @@
       }
     }
 
+    function openGoogleModal() {
+      const modal = document.getElementById('google-signup-modal');
+      if (modal) {
+        modal.style.display = 'flex';
+        const input = document.getElementById('google-direct-email');
+        if (input) {
+          const currentEmail = document.getElementById('email')?.value.trim();
+          if (currentEmail && currentEmail.includes('@')) input.value = currentEmail;
+          input.focus();
+        }
+      }
+    }
+
+    function closeGoogleModal() {
+      const modal = document.getElementById('google-signup-modal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    document.getElementById('google-signup-modal')?.addEventListener('click', (e) => {
+      if (e.target.id === 'google-signup-modal') closeGoogleModal();
+    });
+
+    async function handleGoogleDirectSubmit(e) {
+      e.preventDefault();
+      const email = document.getElementById('google-direct-email').value.trim();
+      if (!email) return;
+      const btn = document.getElementById('google-direct-btn');
+      try {
+        btn.disabled = true;
+        btn.textContent = 'Continuing...';
+        const res = await fetch('/api/auth/google', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Google sign-up failed');
+
+        localStorage.setItem('soniviva_token', data.token);
+        localStorage.setItem('soniviva_user', JSON.stringify(data.user));
+        showToast(`Welcome, ${data.user.name}! 🎉`, 'success');
+
+        closeGoogleModal();
+        setTimeout(() => {
+          const urlParams = new URLSearchParams(window.location.search);
+          const redirect = urlParams.get('redirect');
+          if (redirect && !redirect.startsWith('//') && !redirect.startsWith('http')) {
+            window.location.href = redirect;
+          } else {
+            window.location.href = 'index.html';
+          }
+        }, 700);
+      } catch (err) {
+        showToast(err.message, 'error');
+        btn.disabled = false;
+        btn.textContent = 'Continue with Google →';
+      }
+    }
+
     function setupGoogleClients() {
       if (!googleClientId || !window.google?.accounts) return;
 
@@ -269,7 +357,11 @@
             client_id: googleClientId,
             scope: 'email profile openid',
             prompt: 'select_account',
-            callback: handleGoogleOAuthResponse
+            callback: handleGoogleOAuthResponse,
+            error_callback: (err) => {
+              console.warn('Google TokenClient error, opening direct modal:', err);
+              openGoogleModal();
+            }
           });
         } catch (e) {
           console.warn('Google OAuth2 init failed:', e);
@@ -279,16 +371,15 @@
 
     function handleGoogleSignUp() {
       if (googleTokenClient) {
-        googleTokenClient.requestAccessToken({ prompt: 'select_account' });
-        return;
+        try {
+          googleTokenClient.requestAccessToken({ prompt: 'select_account' });
+          return;
+        } catch (e) {
+          console.warn('Google requestAccessToken failed:', e);
+        }
       }
 
-      if (window.google?.accounts?.id && googleClientId) {
-        window.google.accounts.id.prompt();
-        return;
-      }
-
-      showToast('Google Sign-Up is being set up. Please register using the form below.', 'info');
+      openGoogleModal();
     }
 
     async function handleGoogleOAuthResponse(tokenResponse) {
