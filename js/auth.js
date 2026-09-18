@@ -335,13 +335,7 @@ function initLoginGateInterceptor() {
       target = 'cart.html';
     }
 
-    if (typeof showToast === 'function') {
-      showToast('Please log in first to proceed.', 'info');
-    }
-
-    setTimeout(() => {
-      window.location.href = `login.html?redirect=${encodeURIComponent(target)}&msg=login_required`;
-    }, 300);
+    window.location.href = `login.html?redirect=${encodeURIComponent(target)}&msg=login_required`;
   }, true); // Capture phase
 }
 

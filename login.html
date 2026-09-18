@@ -571,7 +571,6 @@
     if (urlParams.get('msg') === 'login_required') {
       const notice = document.getElementById('login-required-notice');
       if (notice) notice.style.display = 'flex';
-      showToast('Please log in first to proceed.', 'info');
     }
     const redirectParam = urlParams.get('redirect');
     if (redirectParam) {

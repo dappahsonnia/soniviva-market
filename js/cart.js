@@ -187,7 +187,7 @@ function showToast(message, type = 'success') {
   if (!container) {
     container = document.createElement('div');
     container.className = 'toast-container';
-    container.style.cssText = 'position:fixed;top:24px;right:24px;z-index:99999;display:flex;flex-direction:column;gap:10px;pointer-events:none;';
+    container.style.cssText = 'position:fixed;bottom:24px;right:24px;z-index:99999;display:flex;flex-direction:column;gap:10px;pointer-events:none;';
     document.body.appendChild(container);
   }
 
