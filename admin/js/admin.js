@@ -325,5 +325,155 @@ async function deleteCategory(id) {
 // ─── Mobile sidebar toggle ───
 function toggleSidebar() { document.querySelector('.sidebar')?.classList.toggle('open'); }
 
+// ─── Admin Notifications Center ───
+let adminNotifInterval = null;
+
+function ensureNotificationBellInHeader() {
+  const topBarActions = document.querySelector('.top-bar-actions');
+  if (!topBarActions || document.getElementById('notif-btn')) return;
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'notif-wrapper';
+  wrapper.style.cssText = 'position:relative; margin-right:12px;';
+  wrapper.innerHTML = `
+    <button id="notif-btn" class="notif-bell-btn" onclick="toggleNotificationsDropdown()" title="Notifications" style="position:relative; background:#f0f4f1; border:1px solid #d4ded6; border-radius:50%; width:40px; height:40px; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; font-size:18px;">
+      🔔
+      <span id="notif-badge" class="notif-badge" style="display:none; position:absolute; top:-4px; right:-4px; background:#e53935; color:#fff; font-size:11px; font-weight:700; border-radius:10px; padding:2px 6px; min-width:18px; text-align:center;">0</span>
+    </button>
+    <div id="notif-dropdown" class="notif-dropdown" style="display:none; position:absolute; right:0; top:48px; width:340px; max-width:90vw; background:#ffffff; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,0.15); border:1px solid #e0e0e0; z-index:1000; overflow:hidden;">
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:#f8faf8; border-bottom:1px solid #eee;">
+        <span style="font-weight:700; color:#1B5E20; font-size:14px;">Store Notifications</span>
+        <button onclick="markAllNotificationsRead()" style="background:none; border:none; color:#2E7D32; font-size:12px; cursor:pointer; font-weight:600; text-decoration:underline;">Mark all read</button>
+      </div>
+      <div id="notif-list" style="max-height:360px; overflow-y:auto; padding:6px 0;">
+        <div style="padding:16px; text-align:center; color:#888; font-size:13px;">No notifications yet</div>
+      </div>
+    </div>
+  `;
+  topBarActions.insertBefore(wrapper, topBarActions.firstChild);
+}
+
+async function fetchAdminNotifications() {
+  if (!getToken() || !isAdmin()) return;
+  try {
+    const data = await api('/notifications');
+    if (!data) return;
+    renderAdminNotifications(data.notifications || [], data.unreadCount || 0);
+  } catch (err) {
+    console.warn('Failed to load admin notifications:', err);
+  }
+}
+
+function renderAdminNotifications(notifications, unreadCount) {
+  const badge = document.getElementById('notif-badge');
+  const list = document.getElementById('notif-list');
+  
+  if (badge) {
+    if (unreadCount > 0) {
+      badge.style.display = 'inline-block';
+      badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+    } else {
+      badge.style.display = 'none';
+    }
+  }
+
+  if (list) {
+    if (!notifications.length) {
+      list.innerHTML = '<div style="padding:20px; text-align:center; color:#888; font-size:13px;">No notifications yet</div>';
+      return;
+    }
+
+    list.innerHTML = notifications.map(n => {
+      const isUnread = !n.is_read;
+      const icon = n.type === 'order' ? '🛒' : (n.type === 'cart' ? '🛍️' : '🔔');
+      let data = {};
+      try { data = JSON.parse(n.data || '{}'); } catch (e) {}
+
+      let actionBtn = '';
+      if (n.type === 'order') {
+        actionBtn = `<a href="orders.html" style="font-size:11px; color:#1B5E20; text-decoration:underline; margin-top:4px; display:inline-block;">View Orders &rarr;</a>`;
+      }
+
+      return `
+        <div class="notif-item" style="padding:10px 14px; border-bottom:1px solid #f0f0f0; background:${isUnread ? '#F1F8E9' : '#fff'}; display:flex; gap:10px; align-items:flex-start; cursor:pointer;" onclick="markNotificationRead(${n.id})">
+          <div style="font-size:18px; margin-top:2px;">${icon}</div>
+          <div style="flex:1;">
+            <div style="font-size:13px; font-weight:${isUnread ? '700' : '500'}; color:#222;">${escapeAdminHtml(n.title)}</div>
+            <div style="font-size:12px; color:#555; margin-top:2px; line-height:1.4;">${escapeAdminHtml(n.message)}</div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+              <span style="font-size:10px; color:#999;">${timeAgo(n.created_at)}</span>
+              ${actionBtn}
+            </div>
+          </div>
+          ${isUnread ? '<span style="width:8px; height:8px; background:#2E7D32; border-radius:50%; margin-top:6px; flex-shrink:0;"></span>' : ''}
+        </div>
+      `;
+    }).join('');
+  }
+}
+
+function toggleNotificationsDropdown() {
+  const dd = document.getElementById('notif-dropdown');
+  if (!dd) return;
+  const isHidden = dd.style.display === 'none' || !dd.style.display;
+  dd.style.display = isHidden ? 'block' : 'none';
+  if (isHidden) {
+    fetchAdminNotifications();
+  }
+}
+
+// Close dropdown on outside click
+document.addEventListener('click', (e) => {
+  const wrapper = document.querySelector('.notif-wrapper');
+  const dd = document.getElementById('notif-dropdown');
+  if (dd && wrapper && !wrapper.contains(e.target)) {
+    dd.style.display = 'none';
+  }
+});
+
+async function markNotificationRead(id) {
+  try {
+    await api(`/notifications/${id}/read`, 'PUT');
+    fetchAdminNotifications();
+  } catch (e) {}
+}
+
+async function markAllNotificationsRead() {
+  try {
+    await api('/notifications/read-all', 'PUT');
+    fetchAdminNotifications();
+  } catch (e) {}
+}
+
+function escapeAdminHtml(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function timeAgo(dateStr) {
+  if (!dateStr) return '';
+  try {
+    const diff = (Date.now() - new Date(dateStr).getTime()) / 1000;
+    if (diff < 60) return 'Just now';
+    if (diff < 3600) return `${Math.floor(diff/60)}m ago`;
+    if (diff < 86400) return `${Math.floor(diff/3600)}h ago`;
+    return `${Math.floor(diff/86400)}d ago`;
+  } catch (e) {
+    return dateStr;
+  }
+}
+
+function initAdminNotifications() {
+  ensureNotificationBellInHeader();
+  fetchAdminNotifications();
+  if (!adminNotifInterval) {
+    adminNotifInterval = setInterval(fetchAdminNotifications, 15000);
+  }
+}
+
 // Init
-document.addEventListener('DOMContentLoaded', () => { if (!adminGuard()) return; initSidebar(); });
+document.addEventListener('DOMContentLoaded', () => { 
+  if (!adminGuard()) return; 
+  initSidebar(); 
+  initAdminNotifications();
+});

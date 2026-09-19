@@ -180,6 +180,15 @@ async function initDatabase() {
   // Ensure default accounts exist with updated credentials
   syncDefaultUsers();
 
+  // Ensure notifications schema has 'data' column
+  try {
+    const cols = db.prepare('PRAGMA table_info(notifications)').all();
+    if (cols.length && !cols.some(c => c.name === 'data')) {
+      db.exec('ALTER TABLE notifications ADD COLUMN data TEXT DEFAULT "{}"');
+      console.log('✅ Migrated notifications table: added data column');
+    }
+  } catch (e) {}
+
   return db;
 }
 
@@ -312,6 +321,16 @@ function createTables() {
       email TEXT NOT NULL,
       code TEXT NOT NULL,
       expires_at DATETIME NOT NULL,
+      created_at DATETIME DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS notifications (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      type TEXT NOT NULL,
+      title TEXT NOT NULL,
+      message TEXT NOT NULL,
+      data TEXT DEFAULT '{}',
+      is_read INTEGER DEFAULT 0,
       created_at DATETIME DEFAULT (datetime('now'))
     );
   `);

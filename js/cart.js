@@ -35,6 +35,23 @@ function addToCart(productId) {
 
   saveCart(cart);
   showToast(`${product.name} added to cart!`, 'success');
+
+  // Notify admin in background
+  try {
+    const user = typeof getUser === 'function' ? getUser() : null;
+    fetch('/api/cart/notify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        productId: product.id,
+        productName: product.name,
+        quantity: existing ? existing.quantity : 1,
+        price: product.price,
+        userEmail: user ? user.email : '',
+        userName: user ? user.name : ''
+      })
+    }).catch(() => {});
+  } catch (e) {}
 }
 
 function removeFromCart(productId) {

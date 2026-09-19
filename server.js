@@ -52,6 +52,18 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/user', require('./routes/user'));
 
+// ─── Cart Activity Notification (Public / User) ───
+app.post('/api/cart/notify', (req, res) => {
+  try {
+    const { notifyCartActivity } = require('./utils/notifications');
+    notifyCartActivity(req.body);
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Cart notification error:', err);
+    res.status(500).json({ error: 'Failed to record cart activity' });
+  }
+});
+
 // ─── API Products endpoint (public) ───
 app.get('/api/products', (req, res) => {
   const { getDb } = require('./db/database');

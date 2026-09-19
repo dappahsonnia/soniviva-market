@@ -5,12 +5,11 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const { getDb } = require('../db/database');
-const { authenticateToken } = require('../middleware/auth');
-
-router.use(authenticateToken);
+const { authenticateToken, optionalAuth } = require('../middleware/auth');
+const { notifyOrderPlaced, generateWhatsAppOrderLink } = require('../utils/notifications');
 
 // GET /api/user/profile
-router.get('/profile', (req, res) => {
+router.get('/profile', authenticateToken, (req, res) => {
   try {
     const u = getDb().prepare('SELECT id,name,email,phone,role,address,city,region,created_at FROM users WHERE id=?').get(req.user.id);
     if (!u) return res.status(404).json({ error: 'User not found' });
@@ -21,7 +20,7 @@ router.get('/profile', (req, res) => {
 });
 
 // PUT /api/user/profile
-router.put('/profile', (req, res) => {
+router.put('/profile', authenticateToken, (req, res) => {
   try {
     const b = req.body;
     const db = getDb();
@@ -35,7 +34,7 @@ router.put('/profile', (req, res) => {
 });
 
 // POST /api/user/change-password
-router.post('/change-password', (req, res) => {
+router.post('/change-password', authenticateToken, (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
     if (!currentPassword || !newPassword) {
@@ -62,7 +61,7 @@ router.post('/change-password', (req, res) => {
 });
 
 // POST /api/user/orders
-router.post('/orders', (req, res) => {
+router.post('/orders', optionalAuth, async (req, res) => {
   try {
     const db = getDb();
     const { items, shipping, payment } = req.body;
@@ -83,6 +82,9 @@ router.post('/orders', (req, res) => {
     const total = subtotal + deliveryFee;
     const s = shipping || {};
     const p = payment || {};
+    const userId = req.user ? req.user.id : null;
+    const customerName = s.name || (req.user ? req.user.name : 'Customer');
+    const customerEmail = s.email || (req.user ? req.user.email : '');
 
     const r = db.prepare(`
       INSERT INTO orders (
@@ -92,8 +94,8 @@ router.post('/orders', (req, res) => {
         payment_method, payment_details
       ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
     `).run(
-      req.user.id, orderNumber, 'pending', subtotal, deliveryFee, total,
-      s.name || req.user.name, s.email || req.user.email, s.phone || '', s.address || '',
+      userId, orderNumber, 'pending', subtotal, deliveryFee, total,
+      customerName, customerEmail, s.phone || '', s.address || '',
       s.city || '', s.region || '', s.gps || '', s.notes || '',
       p.method || '', JSON.stringify(p)
     );
@@ -108,7 +110,39 @@ router.post('/orders', (req, res) => {
       db.prepare('UPDATE products SET stock=MAX(0,stock-?) WHERE id=?').run(i.quantity, i.product_id);
     });
 
-    res.status(201).json({ message: 'Order placed successfully', orderNumber, orderId, total });
+    const orderRecord = {
+      id: orderId,
+      order_number: orderNumber,
+      subtotal,
+      delivery_fee: deliveryFee,
+      total,
+      shipping_name: customerName,
+      shipping_email: customerEmail,
+      shipping_phone: s.phone || '',
+      shipping_address: s.address || '',
+      shipping_city: s.city || '',
+      shipping_region: s.region || '',
+      shipping_gps: s.gps || '',
+      shipping_notes: s.notes || '',
+      payment_method: p.method || 'cash'
+    };
+
+    let whatsappLink = '';
+    try {
+      const notifRes = await notifyOrderPlaced(orderRecord, resolved);
+      whatsappLink = notifRes.whatsappLink;
+    } catch (notifErr) {
+      console.error('Notification dispatch error:', notifErr);
+      whatsappLink = generateWhatsAppOrderLink(orderRecord, resolved);
+    }
+
+    res.status(201).json({ 
+      message: 'Order placed successfully', 
+      orderNumber, 
+      orderId, 
+      total,
+      whatsappLink 
+    });
   } catch (err) {
     console.error('Order error:', err);
     res.status(500).json({ error: 'Failed to place order' });
@@ -116,7 +150,7 @@ router.post('/orders', (req, res) => {
 });
 
 // GET /api/user/orders
-router.get('/orders', (req, res) => {
+router.get('/orders', authenticateToken, (req, res) => {
   try {
     const db = getDb();
     const orders = db.prepare('SELECT * FROM orders WHERE user_id=? ORDER BY created_at DESC').all(req.user.id);
@@ -130,7 +164,7 @@ router.get('/orders', (req, res) => {
 });
 
 // GET /api/user/orders/:id
-router.get('/orders/:id', (req, res) => {
+router.get('/orders/:id', authenticateToken, (req, res) => {
   try {
     const db = getDb();
     const o = db.prepare('SELECT * FROM orders WHERE id=? AND user_id=?').get(parseInt(req.params.id), req.user.id);

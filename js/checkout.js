@@ -462,30 +462,50 @@ async function placeOrder() {
   // Generate default order number
   let orderNum = 'SNV-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).substring(2, 6).toUpperCase();
 
-  // If user is logged in, sync with database
-  if (typeof isLoggedIn === 'function' && isLoggedIn()) {
-    try {
-      const items = currentCart.map(i => ({ id: i.id, quantity: i.quantity }));
-      const res = await authFetch('/api/user/orders', {
-        method: 'POST',
-        body: JSON.stringify({
-          items,
-          shipping: checkoutData.shipping,
-          payment: checkoutData.payment
-        })
-      });
-      if (res.ok) {
-        const orderData = await res.json();
-        if (orderData.orderNumber) {
-          orderNum = orderData.orderNumber;
-        }
+  // Universal order sync to backend for database logging and admin notification
+  const ADMIN_WHATSAPP = '233597118637';
+  let serverWhatsappLink = '';
+
+  try {
+    const items = currentCart.map(i => ({ id: i.id, quantity: i.quantity }));
+    const requestFn = (typeof isLoggedIn === 'function' && isLoggedIn()) 
+      ? authFetch 
+      : (url, opts) => fetch(url, { ...opts, headers: { 'Content-Type': 'application/json', ...(opts.headers || {}) } });
+
+    const res = await requestFn('/api/user/orders', {
+      method: 'POST',
+      body: JSON.stringify({
+        items,
+        shipping: checkoutData.shipping,
+        payment: checkoutData.payment
+      })
+    });
+    if (res.ok) {
+      const orderData = await res.json();
+      if (orderData.orderNumber) {
+        orderNum = orderData.orderNumber;
       }
-    } catch (e) {
-      console.warn('Backend order recording error:', e);
+      if (orderData.whatsappLink) {
+        serverWhatsappLink = orderData.whatsappLink;
+      }
     }
+  } catch (e) {
+    console.warn('Backend order recording error:', e);
   }
 
   checkoutData.orderNumber = orderNum;
+
+  // Build fallback WhatsApp order dispatch URL if needed
+  let whatsappUrl = serverWhatsappLink;
+  if (!whatsappUrl) {
+    const itemsText = currentCart.map(i => {
+      const p = getProductById(i.id);
+      return `• ${p ? p.name : 'Product'} x${i.quantity} (GH₵ ${((p ? p.price : 0) * i.quantity).toFixed(2)})`;
+    }).join('\n');
+    const deliveryAddress = [checkoutData.shipping.address, checkoutData.shipping.city, checkoutData.shipping.region].filter(Boolean).join(', ');
+    const msg = `🛒 *NEW ORDER RECEIVED — SONIVIVA*\n----------------------------------\n*Order Number:* ${orderNum}\n*Customer:* ${checkoutData.shipping.name || 'Customer'}\n*Phone:* ${checkoutData.shipping.phone || 'N/A'}\n*Email:* ${checkoutData.shipping.email || 'N/A'}\n*Address:* ${deliveryAddress || 'Not specified'}\n\n📦 *Items Ordered:*\n${itemsText}\n\n💰 *Subtotal:* GH₵ ${(total - DELIVERY_FEE).toFixed(2)}\n🚚 *Delivery:* GH₵ ${DELIVERY_FEE.toFixed(2)}\n💵 *TOTAL AMOUNT:* GH₵ ${total.toFixed(2)}\n💳 *Payment Method:* ${(checkoutData.payment.label || checkoutData.payment.method || 'Cash on Delivery').toUpperCase()}\n${checkoutData.shipping.notes ? `📝 *Notes:* ${checkoutData.shipping.notes}\n` : ''}----------------------------------\n_Automated Order Dispatch from Soniviva Market_`;
+    whatsappUrl = `https://wa.me/${ADMIN_WHATSAPP}?text=${encodeURIComponent(msg)}`;
+  }
 
   // Calculate estimated delivery
   const deliveryDate = new Date();
@@ -526,9 +546,23 @@ async function placeOrder() {
         </div>
       </div>
 
+      <!-- Admin Instant WhatsApp Dispatch -->
+      <div style="background:#E8F5E9; border:2px solid #2E7D32; border-radius:14px; padding:20px; margin:24px 0; text-align:center;">
+        <div style="display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:8px;">
+          <span style="font-size:24px;">💬</span>
+          <h3 style="margin:0; color:#1B5E20; font-size:1.15rem; font-weight:700;">Instant WhatsApp Dispatch</h3>
+        </div>
+        <p style="margin:0 0 16px; font-size:14px; color:#2E7D32; line-height:1.5;">
+          Click below to send your order receipt directly to store management on WhatsApp for immediate priority dispatch!
+        </p>
+        <a href="${whatsappUrl}" target="_blank" rel="noopener noreferrer" class="btn" style="display:inline-flex; align-items:center; justify-content:center; gap:10px; background:#25D366; color:#ffffff; font-weight:700; font-size:15px; padding:14px 26px; border-radius:30px; text-decoration:none; box-shadow:0 4px 14px rgba(37,211,102,0.35); transition:all 0.2s ease;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+          Send Order to WhatsApp Manager
+        </a>
+      </div>
+
       <p class="confirmation-note">
-        📧 A confirmation email has been sent to <strong>${checkoutData.shipping.email}</strong>
-        with your order details and tracking information.
+        📧 A confirmation has also been dispatched to <strong>${checkoutData.shipping.email}</strong> and store operations.
       </p>
 
       <div class="confirmation-actions">
