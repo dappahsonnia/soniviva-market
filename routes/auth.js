@@ -32,8 +32,30 @@ router.post('/register', (req, res) => {
     }
 
     const db = getDb();
-    const existing = db.prepare('SELECT id FROM users WHERE LOWER(TRIM(email)) = ?').get(cleanEmail);
+    const existing = db.prepare('SELECT * FROM users WHERE LOWER(TRIM(email)) = ?').get(cleanEmail);
     if (existing) {
+      // If password matches existing account, log them in immediately!
+      if (existing.password_hash && bcrypt.compareSync(password, existing.password_hash)) {
+        const token = jwt.sign(
+          { id: existing.id, email: existing.email, role: existing.role, name: existing.name },
+          SECRET,
+          { expiresIn: '7d' }
+        );
+        res.cookie('token', token, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 });
+        return res.status(200).json({
+          message: 'Signed in successfully! Welcome back to Soniviva Market.',
+          token,
+          user: {
+            id: existing.id,
+            name: existing.name,
+            email: existing.email,
+            role: existing.role,
+            phone: existing.phone || ''
+          },
+          alreadyExisted: true
+        });
+      }
+
       return res.status(409).json({
         error: 'This email is already registered. If you have forgotten your password, please use the Forgot Password option to reset it.',
         code: 'EMAIL_ALREADY_REGISTERED',
@@ -92,11 +114,8 @@ router.post('/login', (req, res) => {
 
     if (!user) {
       // User does not exist yet — allow them to sign in through email directly without having to register first!
-      if (password.length < 8) {
-        return res.status(400).json({ error: 'Password must be at least 8 characters' });
-      }
-      if (!/[A-Z]/.test(password) || !/[0-9]/.test(password)) {
-        return res.status(400).json({ error: 'Password must contain at least one uppercase letter and one number' });
+      if (password.length < 6) {
+        return res.status(400).json({ error: 'Password must be at least 6 characters' });
       }
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
         return res.status(400).json({ error: 'Invalid email address' });
@@ -285,6 +304,115 @@ router.post('/reset-password', (req, res) => {
   } catch (err) {
     console.error('Reset error:', err);
     res.status(500).json({ error: 'Password reset failed. Please try again.' });
+  }
+});
+
+// POST /api/auth/email-code-request — Send 1-time sign-in code to user's email
+router.post('/email-code-request', async (req, res) => {
+  try {
+    const { email } = req.body || {};
+    const cleanEmail = (email || '').toLowerCase().trim();
+
+    if (!cleanEmail || !cleanEmail.includes('@') || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+      return res.status(400).json({ error: 'Please enter a valid email address.' });
+    }
+
+    const db = getDb();
+    let user = db.prepare('SELECT id, name, email, role FROM users WHERE LOWER(TRIM(email)) = ?').get(cleanEmail);
+    if (!user) {
+      const displayName = cleanEmail.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+      const tempPass = 'otp_' + Math.random().toString(36).slice(-10) + Date.now().toString(36);
+      const tempHash = bcrypt.hashSync(tempPass, 10);
+      const role = cleanEmail === 'dappahsonnia@gmail.com' ? 'admin' : 'user';
+      const insertResult = db.prepare('INSERT INTO users (name, email, phone, password_hash, role) VALUES (?, ?, ?, ?, ?)').run(
+        displayName, cleanEmail, '', tempHash, role
+      );
+      user = { id: insertResult.lastInsertRowid, name: displayName, email: cleanEmail, role };
+    }
+
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString();
+
+    db.prepare('DELETE FROM password_resets WHERE LOWER(TRIM(email)) = ?').run(cleanEmail);
+    db.prepare('INSERT INTO password_resets (email, code, expires_at) VALUES (?, ?, ?)').run(cleanEmail, code, expiresAt);
+
+    const { sendPasswordResetOtp } = require('../utils/email');
+    const sendResult = await sendPasswordResetOtp(cleanEmail, code);
+
+    const responsePayload = {
+      success: true,
+      message: `A 6-digit sign-in code was sent to ${cleanEmail}.`,
+      email: cleanEmail
+    };
+
+    if (!sendResult.sent) {
+      responsePayload.demoCode = code;
+      responsePayload.message = `Verification code generated for ${cleanEmail}.`;
+    }
+
+    res.json(responsePayload);
+  } catch (err) {
+    console.error('Email code request error:', err);
+    res.status(500).json({ error: 'Failed to send sign-in code. Please try again.' });
+  }
+});
+
+// POST /api/auth/email-code-verify — Verify 1-time code and log in
+router.post('/email-code-verify', (req, res) => {
+  try {
+    const { email, code } = req.body || {};
+    const cleanEmail = (email || '').toLowerCase().trim();
+    const cleanCode = (code || '').toString().trim();
+
+    if (!cleanEmail || !cleanCode) {
+      return res.status(400).json({ error: 'Email and 6-digit code are required.' });
+    }
+
+    const db = getDb();
+    const nowIso = new Date().toISOString();
+    const resetRecord = db.prepare(`
+      SELECT * FROM password_resets 
+      WHERE LOWER(TRIM(email)) = ? AND code = ? AND expires_at > ?
+      ORDER BY id DESC LIMIT 1
+    `).get(cleanEmail, cleanCode, nowIso);
+
+    if (!resetRecord) {
+      return res.status(400).json({ error: 'Invalid or expired verification code.' });
+    }
+
+    db.prepare('DELETE FROM password_resets WHERE LOWER(TRIM(email)) = ?').run(cleanEmail);
+
+    let user = db.prepare('SELECT * FROM users WHERE LOWER(TRIM(email)) = ?').get(cleanEmail);
+    if (!user) {
+      const displayName = cleanEmail.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+      const role = cleanEmail === 'dappahsonnia@gmail.com' ? 'admin' : 'user';
+      const tempHash = bcrypt.hashSync('pass_' + Date.now(), 10);
+      const insertResult = db.prepare('INSERT INTO users (name, email, phone, password_hash, role) VALUES (?, ?, ?, ?, ?)').run(
+        displayName, cleanEmail, '', tempHash, role
+      );
+      user = { id: insertResult.lastInsertRowid, name: displayName, email: cleanEmail, role, phone: '' };
+    }
+
+    if (cleanEmail === 'dappahsonnia@gmail.com' && user.role !== 'admin') {
+      db.prepare('UPDATE users SET role = ? WHERE id = ?').run('admin', user.id);
+      user.role = 'admin';
+    }
+
+    const token = jwt.sign(
+      { id: user.id, email: user.email, role: user.role, name: user.name },
+      SECRET,
+      { expiresIn: '7d' }
+    );
+
+    res.cookie('token', token, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 });
+    res.json({
+      message: 'Signed in successfully!',
+      token,
+      user: { id: user.id, name: user.name, email: user.email, role: user.role, phone: user.phone || '' }
+    });
+  } catch (err) {
+    console.error('Email code verify error:', err);
+    res.status(500).json({ error: 'Failed to verify code. Please try again.' });
   }
 });
 

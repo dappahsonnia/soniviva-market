@@ -48,14 +48,31 @@
         Sign in with Google
       </button>
 
+      <div style="text-align:center; margin:-12px 0 18px;">
+        <button type="button" onclick="openGoogleModal()" style="background:none; border:none; color:#1B5E20; font-size:0.82rem; font-weight:600; cursor:pointer; text-decoration:underline; padding:4px;">
+          Trouble with Google popup? Sign in with Google email directly &rarr;
+        </button>
+      </div>
+
       <div class="auth-divider">
         <span>or sign in with email</span>
       </div>
+
+      <!-- Email Login Mode Switcher -->
+      <div style="display:flex; background:#F0EDE6; border-radius:8px; padding:3px; margin-bottom:18px;">
+        <button type="button" id="tab-password-btn" onclick="switchEmailTab('password')" style="flex:1; padding:8px; font-size:0.84rem; font-weight:600; border:none; border-radius:6px; background:#fff; color:#1B5E20; cursor:pointer; box-shadow:0 1px 3px rgba(0,0,0,0.1); transition:all 0.2s;">
+          🔑 Password
+        </button>
+        <button type="button" id="tab-code-btn" onclick="switchEmailTab('code')" style="flex:1; padding:8px; font-size:0.84rem; font-weight:600; border:none; border-radius:6px; background:transparent; color:#666; cursor:pointer; transition:all 0.2s;">
+          ✉️ 1-Time Code (OTP)
+        </button>
+      </div>
       
+      <!-- Standard Password Form -->
       <form id="login-form" autocomplete="off">
         <div class="form-group">
           <label for="email">Email Address</label>
-          <input type="text" inputmode="email" id="email" name="login_email" required placeholder="Enter your email" autocomplete="off">
+          <input type="email" id="email" name="login_email" required placeholder="Enter your email" autocomplete="email">
         </div>
         <div class="form-group">
           <label for="password">Password</label>
@@ -76,7 +93,7 @@
           </label>
         </div>
         
-        <button type="submit" class="btn btn-primary">Login</button>
+        <button type="submit" class="btn btn-primary">Login / Sign In</button>
 
         <!-- Dynamic Password Recovery Box (Activated ONLY when incorrect password is submitted) -->
         <div id="wrong-password-box" style="display:none; background:#FFF8E1; border:1px solid #FFE082; border-radius:10px; padding:14px 16px; margin-top:16px; text-align:center;">
@@ -89,6 +106,33 @@
           <button type="button" id="forgot-password-btn" class="btn btn-sm btn-outline" style="width:100%; border-color:#D84315; color:#D84315; padding:10px 14px; font-size:0.88rem; font-weight:600; background:#fff;">
             🔑 Reset Forgotten Password
           </button>
+        </div>
+      </form>
+
+      <!-- Passwordless 1-Time Email Code Form -->
+      <form id="email-code-form" style="display:none;" autocomplete="off" onsubmit="handleSendOtpSubmit(event)">
+        <div id="code-step-1">
+          <div class="form-group">
+            <label for="otp-email">Email Address</label>
+            <input type="email" id="otp-email" required placeholder="name@example.com" autocomplete="email">
+          </div>
+          <p style="font-size:0.82rem; color:#666; margin-bottom:14px; line-height:1.4;">
+            We'll send a 6-digit verification code to your email for instant sign-in without a password.
+          </p>
+          <button type="submit" id="send-otp-btn" class="btn btn-primary">Send Sign-In Code &rarr;</button>
+        </div>
+
+        <div id="code-step-2" style="display:none;">
+          <div class="form-group">
+            <label>Verification Code</label>
+            <input type="text" id="otp-code" required maxlength="6" inputmode="numeric" placeholder="123456" style="padding:12px 16px; border:2px solid #D4A017; border-radius:8px; font-size:1.25rem; letter-spacing:6px; text-align:center; font-family:monospace; font-weight:700; width:100%; box-sizing:border-box;">
+            <div style="font-size:0.75rem; color:#888; margin-top:4px;">Code sent to <span id="otp-sent-to" style="color:#1B5E20; font-weight:600;"></span></div>
+          </div>
+          <div id="otp-demo-banner" style="display:none; background:#E8F5E9; border:1px solid #A5D6A7; color:#1B5E20; padding:8px 12px; border-radius:8px; font-size:0.84rem; margin-bottom:12px; text-align:center;"></div>
+          <button type="button" id="verify-otp-btn" onclick="handleVerifyOtpSubmit()" class="btn btn-primary" style="margin-bottom:12px;">Sign In with Code</button>
+          <div style="text-align:center;">
+            <button type="button" onclick="resetOtpForm()" style="background:none; border:none; color:#666; font-size:0.82rem; text-decoration:underline; cursor:pointer;">Use a different email</button>
+          </div>
         </div>
       </form>
       
@@ -328,6 +372,11 @@
       }
     }
 
+    function isRawIpAddress() {
+      const host = window.location.hostname;
+      return /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(host);
+    }
+
     function setupGoogleClients() {
       if (!googleClientId || !window.google?.accounts) return;
 
@@ -351,6 +400,13 @@
     }
 
     function handleGoogleSignIn() {
+      // If accessed via local network IP on personal device (e.g. 10.197.197.173),
+      // Google OAuth popup strictly blocks raw IP origins. Open direct modal immediately!
+      if (isRawIpAddress()) {
+        openGoogleModal();
+        return;
+      }
+
       if (googleTokenClient) {
         try {
           googleTokenClient.requestAccessToken({ prompt: 'select_account' });
@@ -366,9 +422,8 @@
     // Handles response from Google OAuth2 Token Client (with account selection)
     async function handleGoogleOAuthResponse(tokenResponse) {
       if (tokenResponse.error) {
-        if (tokenResponse.error !== 'popup_closed_by_user') {
-          showToast('Google sign-in was cancelled.', 'info');
-        }
+        console.warn('Google OAuth response issue:', tokenResponse.error);
+        openGoogleModal();
         return;
       }
 
@@ -399,9 +454,139 @@
         }, 700);
       } catch (err) {
         showToast(err.message, 'error');
+        openGoogleModal();
       }
     }
 
+    // ---- Email Tab Switcher (Password vs 1-Time Code) ----
+    function switchEmailTab(tab) {
+      const pwdTabBtn = document.getElementById('tab-password-btn');
+      const codeTabBtn = document.getElementById('tab-code-btn');
+      const pwdForm = document.getElementById('login-form');
+      const codeForm = document.getElementById('email-code-form');
+
+      if (tab === 'password') {
+        pwdTabBtn.style.background = '#fff';
+        pwdTabBtn.style.color = '#1B5E20';
+        pwdTabBtn.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+        codeTabBtn.style.background = 'transparent';
+        codeTabBtn.style.color = '#666';
+        codeTabBtn.style.boxShadow = 'none';
+
+        pwdForm.style.display = 'block';
+        codeForm.style.display = 'none';
+        document.getElementById('email')?.focus();
+      } else {
+        codeTabBtn.style.background = '#fff';
+        codeTabBtn.style.color = '#1B5E20';
+        codeTabBtn.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+        pwdTabBtn.style.background = 'transparent';
+        pwdTabBtn.style.color = '#666';
+        pwdTabBtn.style.boxShadow = 'none';
+
+        pwdForm.style.display = 'none';
+        codeForm.style.display = 'block';
+
+        const currentEmail = document.getElementById('email')?.value.trim();
+        const otpEmail = document.getElementById('otp-email');
+        if (otpEmail) {
+          if (currentEmail) otpEmail.value = currentEmail;
+          otpEmail.focus();
+        }
+      }
+    }
+
+    let activeOtpEmail = '';
+
+    function resetOtpForm() {
+      document.getElementById('code-step-1').style.display = 'block';
+      document.getElementById('code-step-2').style.display = 'none';
+      document.getElementById('otp-code').value = '';
+      const banner = document.getElementById('otp-demo-banner');
+      if (banner) banner.style.display = 'none';
+      document.getElementById('otp-email').focus();
+    }
+
+    async function handleSendOtpSubmit(e) {
+      e.preventDefault();
+      const email = document.getElementById('otp-email').value.trim();
+      if (!email) return;
+      const btn = document.getElementById('send-otp-btn');
+      try {
+        btn.disabled = true;
+        btn.textContent = 'Sending sign-in code...';
+        const res = await fetch('/api/auth/email-code-request', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to send verification code');
+
+        activeOtpEmail = email;
+        document.getElementById('otp-sent-to').textContent = email;
+        document.getElementById('code-step-1').style.display = 'none';
+        document.getElementById('code-step-2').style.display = 'block';
+
+        const banner = document.getElementById('otp-demo-banner');
+        if (data.demoCode) {
+          document.getElementById('otp-code').value = data.demoCode;
+          if (banner) {
+            banner.innerHTML = `🔑 Verification Code: <strong style="letter-spacing:2px; font-size:1.05rem;">${data.demoCode}</strong><br><span style="font-size:0.8rem; color:#2E7D32;">(Auto-filled for instant verification)</span>`;
+            banner.style.display = 'block';
+          }
+        }
+        showToast('Sign-in code sent to your email!', 'success');
+        document.getElementById('otp-code').focus();
+      } catch (err) {
+        showToast(err.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Send Sign-In Code →';
+      }
+    }
+
+    async function handleVerifyOtpSubmit() {
+      const email = activeOtpEmail || document.getElementById('otp-email').value.trim();
+      const code = document.getElementById('otp-code').value.trim();
+      if (!code) {
+        showToast('Please enter the 6-digit code', 'error');
+        return;
+      }
+      const btn = document.getElementById('verify-otp-btn');
+      try {
+        btn.disabled = true;
+        btn.textContent = 'Signing in...';
+        const res = await fetch('/api/auth/email-code-verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, code })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to sign in');
+
+        localStorage.setItem('soniviva_token', data.token);
+        localStorage.setItem('soniviva_user', JSON.stringify(data.user));
+        showToast(`Welcome back, ${data.user.name}!`, 'success');
+
+        setTimeout(() => {
+          const urlParams = new URLSearchParams(window.location.search);
+          const redirect = urlParams.get('redirect');
+          if (redirect && !redirect.startsWith('//') && !redirect.startsWith('http')) {
+            window.location.href = redirect;
+          } else if (data.user && data.user.role === 'admin') {
+            window.location.href = '/admin/';
+          } else {
+            window.location.href = 'index.html';
+          }
+        }, 700);
+      } catch (err) {
+        showToast(err.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Sign In with Code';
+      }
+    }
 
     window.addEventListener('load', () => {
       initGoogleAuth();
@@ -411,8 +596,8 @@
     // ---- Login Form Handler ----
     document.getElementById('login-form').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
+      const email = (document.getElementById('email')?.value || '').trim();
+      const password = document.getElementById('password')?.value || '';
       const btn = e.target.querySelector('button[type="submit"]');
       
       try {

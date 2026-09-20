@@ -13,7 +13,9 @@
           "*.html",
           "css/**",
           "js/**",
-          "admin/**"
+          "admin/**",
+          "utils/**",
+          "routes/**"
         ]
       }
     }
