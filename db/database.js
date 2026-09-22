@@ -219,12 +219,24 @@ function syncDefaultUsers() {
 
   // 2. Default customer account (Blessing Amoah Takyi)
   const blessingEmail = 'blessingoamoahtakyi@gmail.com';
+  const blessingHash = bcrypt.hashSync('Blessing123', 10);
   const existingBlessing = db.prepare('SELECT id, role FROM users WHERE LOWER(TRIM(email)) = ?').get(blessingEmail);
-  if (!existingBlessing) {
-    const blessingHash = bcrypt.hashSync('Blessing123', 10);
-    db.prepare('INSERT INTO users (name, email, phone, password_hash, role, city, region) VALUES (?, ?, ?, ?, ?, ?, ?)')
-      .run('Blessing Amoah Takyi', blessingEmail, '+233 24 123 4567', blessingHash, 'user', 'Accra', 'Greater Accra');
-    console.log('👤 Seeded customer account for:', blessingEmail);
+  if (existingBlessing) {
+    // Refresh password in case it was changed or corrupted
+    db.prepare('UPDATE users SET password_hash = ?, name = COALESCE(NULLIF(name, \'\'), \'Blessing Amoah Takyi\') WHERE id = ?')
+      .run(blessingHash, existingBlessing.id);
+  } else {
+    // Also check for old mistyped email variant and fix it
+    const oldBlessing = db.prepare('SELECT id FROM users WHERE LOWER(TRIM(email)) = ?').get('blessingamoahtakyi@gmail.com');
+    if (oldBlessing) {
+      db.prepare('UPDATE users SET email = ?, password_hash = ?, name = ? WHERE id = ?')
+        .run(blessingEmail, blessingHash, 'Blessing Amoah Takyi', oldBlessing.id);
+      console.log('👤 Fixed mistyped email for Blessing account');
+    } else {
+      db.prepare('INSERT INTO users (name, email, phone, password_hash, role, city, region) VALUES (?, ?, ?, ?, ?, ?, ?)')
+        .run('Blessing Amoah Takyi', blessingEmail, '+233 24 123 4567', blessingHash, 'user', 'Accra', 'Greater Accra');
+      console.log('👤 Seeded customer account for:', blessingEmail);
+    }
   }
 }
 

@@ -455,7 +455,19 @@ function renderReviewStep() {
 }
 
 // ─── Place Order ───
+let _placingOrder = false;
 async function placeOrder() {
+  if (_placingOrder) return; // prevent double-click
+  _placingOrder = true;
+
+  // Disable the place order button if it exists
+  const placeBtn = document.querySelector('.btn-place-order, [onclick*="placeOrder"]');
+  if (placeBtn) {
+    placeBtn.disabled = true;
+    placeBtn.style.opacity = '0.6';
+    placeBtn.textContent = 'Placing Order...';
+  }
+
   const currentCart = getCart();
   const total = getCartTotal();
 

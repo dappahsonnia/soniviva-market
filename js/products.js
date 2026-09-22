@@ -326,7 +326,40 @@ function selectWeight(btn, productId) {
 // ─── Quantity ───
 function incrementQty() { const i = document.getElementById('product-qty'); if (i && parseInt(i.value) < 20) i.value = parseInt(i.value) + 1; }
 function decrementQty() { const i = document.getElementById('product-qty'); if (i && parseInt(i.value) > 1) i.value = parseInt(i.value) - 1; }
-function addToCartWithQty(productId) { const qty = parseInt(document.getElementById('product-qty').value) || 1; for (let i = 0; i < qty; i++) addToCart(productId); }
+function addToCartWithQty(productId) {
+  const qty = parseInt(document.getElementById('product-qty').value) || 1;
+  const product = getProductById(productId);
+  if (!product) return;
+
+  const cart = getCart();
+  const existing = cart.find(item => item.id === productId);
+
+  if (existing) {
+    existing.quantity = Math.min(existing.quantity + qty, 20);
+  } else {
+    cart.push({ id: productId, quantity: Math.min(qty, 20) });
+  }
+
+  saveCart(cart);
+  showToast(`${product.name} x${qty} added to cart!`, 'success');
+
+  // One notification only
+  try {
+    const user = typeof getUser === 'function' ? getUser() : null;
+    fetch('/api/cart/notify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        productId: product.id,
+        productName: product.name,
+        quantity: qty,
+        price: product.price,
+        userEmail: user ? user.email : '',
+        userName: user ? user.name : ''
+      })
+    }).catch(() => {});
+  } catch (e) {}
+}
 
 function renderRelatedProducts(product, containerId) {
   const container = document.getElementById(containerId);

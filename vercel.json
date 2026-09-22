@@ -15,7 +15,8 @@
           "js/**",
           "admin/**",
           "utils/**",
-          "routes/**"
+          "routes/**",
+          "middleware/**"
         ]
       }
     }
