@@ -203,14 +203,19 @@ async function notifyOrderPlaced(order, items = []) {
 
 /**
  * Notify admin when a user adds something to their cart
+ * Sends in-app DB notification + throttled email alert
  */
-function notifyCartActivity(cartData) {
+let _lastCartEmailTime = 0;
+const CART_EMAIL_THROTTLE_MS = 5 * 60 * 1000; // 5 minutes
+
+async function notifyCartActivity(cartData) {
   const db = getDb();
   const { productId, productName, quantity, userEmail, userName, price } = cartData;
   const customer = userName || userEmail || 'A visitor';
   const title = `Cart Activity: ${productName}`;
   const message = `${customer} added ${quantity}x ${productName} (GH₵ ${Number(price * quantity).toFixed(2)}) to cart.`;
 
+  // 1. In-App Database Notification
   try {
     db.prepare(`
       INSERT INTO notifications (type, title, message, data)
@@ -227,6 +232,65 @@ function notifyCartActivity(cartData) {
     console.log(`🛒 [CART NOTIFICATION] Logged in database: ${customer} added ${productName}`);
   } catch (err) {
     console.error('Failed to log cart notification in DB:', err.message);
+  }
+
+  // 2. Email Alert (throttled to avoid spam — max 1 email per 5 minutes)
+  const now = Date.now();
+  if (now - _lastCartEmailTime < CART_EMAIL_THROTTLE_MS) {
+    console.log(`📧 [CART EMAIL THROTTLED] Skipping — last email sent ${Math.round((now - _lastCartEmailTime) / 1000)}s ago`);
+    return;
+  }
+
+  const transport = getTransporter();
+  if (transport) {
+    _lastCartEmailTime = now;
+    const cartEmailHtml = `
+    <!DOCTYPE html>
+    <html>
+    <head><meta charset="UTF-8"></head>
+    <body style="margin:0; padding:0; background:#FAF9F6; font-family:'Segoe UI', Arial, sans-serif; color:#2D2D2D;">
+      <div style="max-width:540px; margin:30px auto; background:#ffffff; border-radius:16px; overflow:hidden; box-shadow:0 6px 25px rgba(0,0,0,0.06); border:1px solid #E5E2DB;">
+        <div style="background:linear-gradient(135deg, #1B5E20, #2E7D32); padding:24px 28px; text-align:center;">
+          <h1 style="color:#ffffff; margin:0; font-size:22px; letter-spacing:2px; font-weight:800;">SONI<span style="color:#D4A017;">VIVA</span></h1>
+          <p style="color:#E8F5E9; margin:6px 0 0; font-size:13px;">🛍️ Cart Activity Alert</p>
+        </div>
+        <div style="padding:28px;">
+          <div style="background:#FFF8E1; border-left:4px solid #F9A825; padding:14px 18px; border-radius:4px; margin-bottom:20px;">
+            <strong style="color:#E65100; font-size:15px;">🛒 ${customer} added to cart</strong>
+          </div>
+          <table style="width:100%; font-size:14px; border-collapse:collapse;">
+            <tr><td style="padding:8px 0; color:#666; width:120px;">Product:</td><td style="padding:8px 0; font-weight:600;">${productName}</td></tr>
+            <tr><td style="padding:8px 0; color:#666;">Quantity:</td><td style="padding:8px 0; font-weight:600;">x${quantity}</td></tr>
+            <tr><td style="padding:8px 0; color:#666;">Price:</td><td style="padding:8px 0; font-weight:600; color:#1B5E20;">GH₵ ${Number(price * quantity).toFixed(2)}</td></tr>
+            <tr><td style="padding:8px 0; color:#666;">Customer:</td><td style="padding:8px 0;">${customer}</td></tr>
+            ${userEmail ? `<tr><td style="padding:8px 0; color:#666;">Email:</td><td style="padding:8px 0;"><a href="mailto:${userEmail}" style="color:#2E7D32;">${userEmail}</a></td></tr>` : ''}
+            <tr><td style="padding:8px 0; color:#666;">Time:</td><td style="padding:8px 0;">${new Date().toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' })}</td></tr>
+          </table>
+          <div style="text-align:center; margin-top:24px;">
+            <a href="https://soniviva-market.vercel.app/admin/" style="display:inline-block; background:#1B5E20; color:#ffffff; padding:12px 24px; border-radius:8px; font-weight:600; font-size:14px; text-decoration:none;">🛒 Open Admin Dashboard</a>
+          </div>
+        </div>
+        <div style="background:#F8FBF8; padding:16px 28px; text-align:center; border-top:1px solid #E5E2DB;">
+          <p style="margin:0; font-size:11px; color:#999;">© 2026 SONIVIVA by Rita Foods and Co. Cart Activity Alert</p>
+        </div>
+      </div>
+    </body>
+    </html>
+    `;
+
+    try {
+      await transport.sendMail({
+        from: `"SONIVIVA Store" <${SMTP_USER}>`,
+        to: ADMIN_EMAIL,
+        subject: `🛍️ Cart Activity: ${customer} added ${productName} — SONIVIVA`,
+        html: cartEmailHtml
+      });
+      console.log(`📧 Cart activity email sent to ${ADMIN_EMAIL}`);
+    } catch (emailErr) {
+      console.error('Failed to send cart email:', emailErr.message);
+    }
+  } else {
+    console.log(`📧 [CART EMAIL SIMULATED] Would send to ${ADMIN_EMAIL} for ${productName}`);
   }
 }
 
