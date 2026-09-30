@@ -2006,7 +2006,7 @@ body {
     -webkit-overflow-scrolling: touch;
     transform: translateX(100%);
     transition: var(--transition);
-    z-index: 999;
+    z-index: 10000;
   }
   .nav-links.active {
     transform: translateX(0);
