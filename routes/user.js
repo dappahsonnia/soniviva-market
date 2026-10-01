@@ -6,7 +6,7 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const { getDb } = require('../db/database');
 const { authenticateToken, optionalAuth } = require('../middleware/auth');
-const { notifyOrderPlaced, generateWhatsAppOrderLink } = require('../utils/notifications');
+const { notifyOrderPlaced, sendCustomerOrderEmail, generateWhatsAppOrderLink } = require('../utils/notifications');
 
 // GET /api/user/profile
 router.get('/profile', authenticateToken, (req, res) => {
@@ -131,6 +131,8 @@ router.post('/orders', optionalAuth, async (req, res) => {
     try {
       const notifRes = await notifyOrderPlaced(orderRecord, resolved);
       whatsappLink = notifRes.whatsappLink;
+      // Send confirmation email to customer
+      await sendCustomerOrderEmail(orderRecord, resolved);
     } catch (notifErr) {
       console.error('Notification dispatch error:', notifErr);
       whatsappLink = generateWhatsAppOrderLink(orderRecord, resolved);

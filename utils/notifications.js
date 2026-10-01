@@ -210,10 +210,14 @@ const CART_EMAIL_THROTTLE_MS = 5 * 60 * 1000; // 5 minutes
 
 async function notifyCartActivity(cartData) {
   const db = getDb();
-  const { productId, productName, quantity, userEmail, userName, price } = cartData;
+  const { productId, productName, quantity, userEmail, userName, price, action } = cartData;
   const customer = userName || userEmail || 'A visitor';
-  const title = `Cart Activity: ${productName}`;
-  const message = `${customer} added ${quantity}x ${productName} (GH₵ ${Number(price * quantity).toFixed(2)}) to cart.`;
+  const actionVerb = action === 'removed' ? 'removed' : action === 'cleared' ? 'cleared' : 'added';
+  const actionIcon = action === 'removed' ? '🗑️' : action === 'cleared' ? '🧹' : '🛒';
+  const title = `${actionIcon} Cart: ${productName}`;
+  const message = action === 'cleared'
+    ? `${customer} cleared their cart (${quantity} items).`
+    : `${customer} ${actionVerb} ${quantity}x ${productName} ${actionVerb === 'added' ? 'to' : 'from'} cart.`;
 
   // 1. In-App Database Notification
   try {
@@ -294,9 +298,122 @@ async function notifyCartActivity(cartData) {
   }
 }
 
+/**
+ * Send order confirmation email to the CUSTOMER
+ */
+async function sendCustomerOrderEmail(order, items = []) {
+  const customerEmail = order.shipping_email;
+  if (!customerEmail) {
+    console.log('📧 [CUSTOMER EMAIL] No customer email provided, skipping');
+    return;
+  }
+
+  const transport = getTransporter();
+  if (!transport) {
+    console.log(`📧 [CUSTOMER EMAIL SIMULATED] Would send confirmation to ${customerEmail} for #${order.order_number}`);
+    return;
+  }
+
+  const itemsHtml = items.map(i => `
+    <tr>
+      <td style="padding:10px 12px; border-bottom:1px solid #eee; font-size:14px; color:#333;">${i.product_name || i.name}</td>
+      <td style="padding:10px 12px; border-bottom:1px solid #eee; font-size:14px; color:#666; text-align:center;">x${i.quantity}</td>
+      <td style="padding:10px 12px; border-bottom:1px solid #eee; font-size:14px; color:#1B5E20; font-weight:600; text-align:right;">GH₵ ${Number(i.total || (i.unit_price * i.quantity) || (i.price * i.quantity)).toFixed(2)}</td>
+    </tr>
+  `).join('');
+
+  const deliveryDate = new Date();
+  deliveryDate.setDate(deliveryDate.getDate() + 1);
+  const deliveryStr = deliveryDate.toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+  const emailHtml = `
+  <!DOCTYPE html>
+  <html>
+  <head><meta charset="UTF-8"></head>
+  <body style="margin:0; padding:0; background:#FAF9F6; font-family:'Segoe UI', Arial, sans-serif; color:#2D2D2D;">
+    <div style="max-width:580px; margin:30px auto; background:#ffffff; border-radius:16px; overflow:hidden; box-shadow:0 6px 25px rgba(0,0,0,0.06); border:1px solid #E5E2DB;">
+      
+      <div style="background:linear-gradient(135deg, #1B5E20, #2E7D32); padding:32px 28px; text-align:center;">
+        <h1 style="color:#ffffff; margin:0; font-size:24px; letter-spacing:2px; font-weight:800;">SONI<span style="color:#D4A017;">VIVA</span></h1>
+        <p style="color:#E8F5E9; margin:6px 0 0; font-size:14px;">✅ Your Order Has Been Confirmed!</p>
+      </div>
+
+      <div style="padding:32px 28px;">
+        <h2 style="font-size:18px; color:#1B5E20; margin:0 0 8px;">Thank you, ${order.shipping_name || 'Valued Customer'}!</h2>
+        <p style="font-size:14px; line-height:1.6; color:#555; margin:0 0 20px;">
+          Your order has been received and is being processed. Here are your order details:
+        </p>
+
+        <div style="background:#E8F5E9; border-left:4px solid #2E7D32; padding:14px 18px; border-radius:4px; margin-bottom:24px;">
+          <strong style="color:#1B5E20; font-size:16px;">Order #${order.order_number}</strong>
+          <div style="color:#2E7D32; font-size:13px; margin-top:4px;">
+            Total: <strong>GH₵ ${Number(order.total).toFixed(2)}</strong> &bull; 
+            Payment: <strong>${(order.payment_method || 'Cash on Delivery').toUpperCase()}</strong>
+          </div>
+        </div>
+
+        <h3 style="font-size:14px; text-transform:uppercase; letter-spacing:1px; color:#888; margin:0 0 12px;">Items Ordered</h3>
+        <table style="width:100%; border-collapse:collapse; margin-bottom:24px;">
+          <thead>
+            <tr style="background:#F0EDE6;">
+              <th style="padding:8px 12px; font-size:12px; color:#555; text-align:left;">Product</th>
+              <th style="padding:8px 12px; font-size:12px; color:#555; text-align:center;">Qty</th>
+              <th style="padding:8px 12px; font-size:12px; color:#555; text-align:right;">Total</th>
+            </tr>
+          </thead>
+          <tbody>${itemsHtml}</tbody>
+          <tfoot>
+            <tr><td colspan="2" style="padding:8px 12px; text-align:right; color:#666; font-size:14px;">Subtotal:</td><td style="padding:8px 12px; text-align:right; font-weight:600;">GH₵ ${Number(order.subtotal).toFixed(2)}</td></tr>
+            <tr><td colspan="2" style="padding:6px 12px; text-align:right; color:#666; font-size:14px;">Delivery:</td><td style="padding:6px 12px; text-align:right; font-weight:600;">GH₵ ${Number(order.delivery_fee || 15).toFixed(2)}</td></tr>
+            <tr style="border-top:2px solid #1B5E20;"><td colspan="2" style="padding:12px; text-align:right; font-weight:800; font-size:16px; color:#1B5E20;">TOTAL:</td><td style="padding:12px; text-align:right; font-weight:800; font-size:18px; color:#1B5E20;">GH₵ ${Number(order.total).toFixed(2)}</td></tr>
+          </tfoot>
+        </table>
+
+        <h3 style="font-size:14px; text-transform:uppercase; letter-spacing:1px; color:#888; margin:0 0 12px;">Delivery Details</h3>
+        <table style="width:100%; font-size:14px; margin-bottom:24px; border-collapse:collapse;">
+          <tr><td style="padding:6px 0; color:#666; width:120px;">Address:</td><td style="padding:6px 0; color:#222;">${[order.shipping_address, order.shipping_city, order.shipping_region].filter(Boolean).join(', ') || 'N/A'}</td></tr>
+          <tr><td style="padding:6px 0; color:#666;">Phone:</td><td style="padding:6px 0; color:#222;">${order.shipping_phone || 'N/A'}</td></tr>
+          <tr><td style="padding:6px 0; color:#666;">Est. Delivery:</td><td style="padding:6px 0; color:#1B5E20; font-weight:600;">${deliveryStr}</td></tr>
+        </table>
+
+        <div style="background:#FFF8E1; border:1px solid #FFE082; border-radius:10px; padding:16px; text-align:center; margin-bottom:20px;">
+          <p style="margin:0 0 8px; font-size:14px; color:#E65100; font-weight:600;">📞 Need help with your order?</p>
+          <p style="margin:0; font-size:13px; color:#555;">
+            Call <strong>0256322653</strong> or WhatsApp <strong>0597118637</strong><br>
+            Quote your order number: <strong>${order.order_number}</strong>
+          </p>
+        </div>
+
+        <div style="text-align:center;">
+          <a href="https://soniviva-market.vercel.app/shop.html" style="display:inline-block; background:#1B5E20; color:#ffffff; padding:12px 28px; border-radius:8px; font-weight:600; font-size:14px; text-decoration:none;">🛒 Continue Shopping</a>
+        </div>
+      </div>
+
+      <div style="background:#F8FBF8; padding:20px 28px; text-align:center; border-top:1px solid #E5E2DB;">
+        <p style="margin:0; font-size:12px; color:#999;">© 2026 SONIVIVA by Rita Foods and Co. All rights reserved.</p>
+      </div>
+    </div>
+  </body>
+  </html>
+  `;
+
+  try {
+    await transport.sendMail({
+      from: `"SONIVIVA Market" <${SMTP_USER}>`,
+      to: customerEmail,
+      subject: `✅ Order Confirmed! #${order.order_number} — SONIVIVA`,
+      html: emailHtml
+    });
+    console.log(`📧 Customer confirmation email sent to ${customerEmail}`);
+  } catch (err) {
+    console.error('Failed to send customer email:', err.message);
+  }
+}
+
 module.exports = {
   notifyOrderPlaced,
   notifyCartActivity,
+  sendCustomerOrderEmail,
   generateWhatsAppOrderLink,
   ADMIN_EMAIL,
   ADMIN_WHATSAPP,

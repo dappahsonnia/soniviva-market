@@ -56,9 +56,31 @@ function addToCart(productId) {
 
 function removeFromCart(productId) {
   let cart = getCart();
+  const removed = cart.find(item => item.id === productId);
   cart = cart.filter(item => item.id !== productId);
   saveCart(cart);
   renderCartPage();
+
+  // Notify admin about removed item
+  if (removed) {
+    const product = getProductById(productId);
+    try {
+      const user = typeof getUser === 'function' ? getUser() : null;
+      fetch('/api/cart/notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          productId,
+          productName: product ? product.name : 'Unknown Product',
+          quantity: removed.quantity,
+          price: product ? product.price : 0,
+          userEmail: user ? user.email : '',
+          userName: user ? user.name : '',
+          action: 'removed'
+        })
+      }).catch(() => {});
+    } catch (e) {}
+  }
 }
 
 function updateCartItemQuantity(productId, newQuantity) {
@@ -77,9 +99,34 @@ function updateCartItemQuantity(productId, newQuantity) {
 }
 
 function clearCart() {
+  const cart = getCart();
   localStorage.removeItem(CART_KEY);
   updateCartBadge();
   renderCartPage();
+
+  // Notify admin about cleared cart
+  if (cart.length > 0) {
+    try {
+      const user = typeof getUser === 'function' ? getUser() : null;
+      const itemNames = cart.map(i => {
+        const p = getProductById(i.id);
+        return p ? p.name : 'Item';
+      }).join(', ');
+      fetch('/api/cart/notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          productId: 0,
+          productName: `Cart Cleared (${cart.length} items: ${itemNames})`,
+          quantity: cart.length,
+          price: 0,
+          userEmail: user ? user.email : '',
+          userName: user ? user.name : '',
+          action: 'cleared'
+        })
+      }).catch(() => {});
+    } catch (e) {}
+  }
 }
 
 // ---- Cart Calculations ----
