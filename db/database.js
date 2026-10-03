@@ -196,7 +196,7 @@ async function initDatabase() {
 function syncDefaultUsers() {
   if (!db) return;
   // 1. Admin account
-  const adminEmail = 'dappahsonnia@gmail.com';
+  const adminEmail = 'sonivivacenter@gmail.com';
   const adminPass = 'Sonnita0275';
   const adminHash = bcrypt.hashSync(adminPass, 12);
   const existingAdmin = db.prepare('SELECT id, role, password_hash FROM users WHERE LOWER(TRIM(email)) = ?').get(adminEmail);
@@ -205,16 +205,30 @@ function syncDefaultUsers() {
     // Preserve admin role and existing password (do not overwrite if admin changed/reset their password)
     if (!existingAdmin.password_hash) {
       db.prepare('UPDATE users SET role = ?, password_hash = ?, name = ? WHERE id = ?')
-        .run('admin', adminHash, 'Sonnia Dappah (Admin)', existingAdmin.id);
+        .run('admin', adminHash, 'Soniviva Admin', existingAdmin.id);
     } else {
-      db.prepare("UPDATE users SET role = 'admin', name = COALESCE(NULLIF(name, ''), 'Sonnia Dappah (Admin)') WHERE id = ?")
+      db.prepare("UPDATE users SET role = 'admin', name = COALESCE(NULLIF(name, ''), 'Soniviva Admin') WHERE id = ?")
         .run(existingAdmin.id);
     }
     console.log('🔑 Admin account verified for:', adminEmail);
   } else {
-    db.prepare('INSERT INTO users (name, email, phone, password_hash, role, city, region) VALUES (?, ?, ?, ?, ?, ?, ?)')
-      .run('Sonnia Dappah (Admin)', adminEmail, '+233 24 123 4567', adminHash, 'admin', 'Accra', 'Greater Accra');
-    console.log('🔑 Created primary admin account for:', adminEmail);
+    // Migrate legacy admin account(s) to the new admin email (keeps password & history)
+    const legacyEmails = ['dappahsonnia@gmail.com', 'soinvivacenter@gmail.com'];
+    let oldAdmin = null;
+    let oldEmail = '';
+    for (const legacy of legacyEmails) {
+      oldAdmin = db.prepare('SELECT id, role, password_hash FROM users WHERE LOWER(TRIM(email)) = ?').get(legacy);
+      if (oldAdmin) { oldEmail = legacy; break; }
+    }
+    if (oldAdmin) {
+      db.prepare("UPDATE users SET email = ?, role = 'admin', name = 'Soniviva Admin' WHERE id = ?")
+        .run(adminEmail, oldAdmin.id);
+      console.log(`🔑 Migrated admin account from ${oldEmail} to:`, adminEmail);
+    } else {
+      db.prepare('INSERT INTO users (name, email, phone, password_hash, role, city, region) VALUES (?, ?, ?, ?, ?, ?, ?)')
+        .run('Soniviva Admin', adminEmail, '+233 24 123 4567', adminHash, 'admin', 'Accra', 'Greater Accra');
+      console.log('🔑 Created primary admin account for:', adminEmail);
+    }
   }
 
   // 2. Default customer account (Blessing Amoah Takyi)
@@ -353,7 +367,7 @@ function seedData() {
   // ── Admin account ──
   const adminHash = bcrypt.hashSync('Sonnita0275', 12);
   db.prepare(`INSERT INTO users (name, email, phone, password_hash, role, city, region) VALUES (?, ?, ?, ?, ?, ?, ?)`)
-    .run('Sonnia Dappah (Admin)', 'dappahsonnia@gmail.com', '+233 24 123 4567', adminHash, 'admin', 'Accra', 'Greater Accra');
+    .run('Soniviva Admin', 'sonivivacenter@gmail.com', '+233 24 123 4567', adminHash, 'admin', 'Accra', 'Greater Accra');
 
   // ── Customer account ──
   const blessingHash = bcrypt.hashSync('Blessing123', 10);

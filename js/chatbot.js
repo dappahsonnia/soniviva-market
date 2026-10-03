@@ -44,7 +44,7 @@
     {
       keywords: ['contact', 'phone', 'call', 'email', 'reach', 'whatsapp', 'number'],
       q: 'How can I contact you?',
-      a: '📞 Call: <strong>0256322653</strong><br>💬 WhatsApp: <strong>0597118637</strong><br>✉️ Email: <strong>dappahsonnia@gmail.com</strong><br>Or visit our <a href="contact.html" style="color:#2E7D32; font-weight:600;">Contact page</a>!'
+      a: '📞 Call: <strong>0256322653</strong><br>💬 WhatsApp: <strong>0597118637</strong><br>✉️ Email: <strong>sonivivacenter@gmail.com</strong><br>Or visit our <a href="contact.html" style="color:#2E7D32; font-weight:600;">Contact page</a>!'
     },
     {
       keywords: ['fresh', 'perishable', 'expire', 'shelf life', 'quality'],

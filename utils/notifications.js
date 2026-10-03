@@ -6,7 +6,7 @@
 const nodemailer = require('nodemailer');
 const { getDb } = require('../db/database');
 
-const ADMIN_EMAIL = 'dappahsonnia@gmail.com';
+const ADMIN_EMAIL = 'sonivivacenter@gmail.com';
 const ADMIN_WHATSAPP = '233597118637'; // 0597118637
 const ADMIN_PHONE = '0256322653';
 
@@ -85,7 +85,7 @@ async function notifyOrderPlaced(order, items = []) {
     console.error('Failed to log order notification in DB:', err.message);
   }
 
-  // 2. Send Email Alert to dappahsonnia@gmail.com
+  // 2. Send Email Alert to sonivivacenter@gmail.com
   const itemsHtml = items.map(i => `
     <tr>
       <td style="padding:10px 12px; border-bottom:1px solid #eee; font-size:14px; color:#333;">${i.product_name || i.name}</td>

@@ -104,7 +104,7 @@ if (require.main === module && !process.env.VERCEL) {
       console.log('  ╠═══════════════════════════════════════════════╣');
       console.log(`  ║   🌐 Local:   http://localhost:${PORT}             ║`);
       console.log(`  ║   📱 Network: http://10.197.197.173:${PORT}        ║`);
-      console.log(`  ║   🔑 Admin:   dappahsonnia@gmail.com          ║`);
+      console.log(`  ║   🔑 Admin:   sonivivacenter@gmail.com          ║`);
       console.log('  ╚═══════════════════════════════════════════════╝');
       console.log('');
     });

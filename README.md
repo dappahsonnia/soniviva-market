@@ -26,7 +26,7 @@
   - Mobile Money (MTN MoMo, Telecel Cash, AT Money), Card, and Cash on Delivery payment options.
   - Full order receipt and invoice generation.
 - **📞 Direct Customer Support**:
-  - **Email**: `dappahsonnia@gmail.com`
+  - **Email**: `sonivivacenter@gmail.com`
   - **Phone (Call)**: `0256322653`
   - **WhatsApp**: `0597118637` (Direct WhatsApp click-to-chat integration)
 
@@ -36,7 +36,7 @@
 
 | Field | Value |
 |---|---|
-| **Email** | `dappahsonnia@gmail.com` |
+| **Email** | `sonivivacenter@gmail.com` |
 | **Password** | `Sonnita0275` |
 | **Role** | `admin` (Full administrative privileges) |
 | **Dashboard URL** | `/admin/` |

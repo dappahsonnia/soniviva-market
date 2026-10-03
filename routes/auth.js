@@ -11,6 +11,15 @@ const { authenticateToken } = require('../middleware/auth');
 
 const SECRET = process.env.JWT_SECRET || 'soniviva-fallback-secret-key';
 
+// Admin email list — primary admin is sonivivacenter@gmail.com
+const ADMIN_EMAILS = [
+  'sonivivacenter@gmail.com'
+];
+
+function isAdminEmail(email) {
+  return ADMIN_EMAILS.includes((email || '').toLowerCase().trim());
+}
+
 // POST /api/auth/register
 router.post('/register', (req, res) => {
   try {
@@ -64,13 +73,14 @@ router.post('/register', (req, res) => {
     }
 
     const hash = bcrypt.hashSync(password, 12);
+    const role = isAdminEmail(cleanEmail) ? 'admin' : 'user';
 
-    const result = db.prepare('INSERT INTO users (name, email, phone, password_hash, role) VALUES (?, ?, ?, ?, ?)').run(cleanName, cleanEmail, (phone || '').trim(), hash, 'user');
+    const result = db.prepare('INSERT INTO users (name, email, phone, password_hash, role) VALUES (?, ?, ?, ?, ?)').run(cleanName, cleanEmail, (phone || '').trim(), hash, role);
 
     const userId = result.lastInsertRowid;
 
     const token = jwt.sign(
-      { id: userId, email: cleanEmail, role: 'user', name: cleanName },
+      { id: userId, email: cleanEmail, role, name: cleanName },
       SECRET,
       { expiresIn: '7d' }
     );
@@ -123,7 +133,7 @@ router.post('/login', (req, res) => {
 
       const displayName = cleanEmail.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
       const hash = bcrypt.hashSync(password, 12);
-      const role = cleanEmail === 'dappahsonnia@gmail.com' ? 'admin' : 'user';
+      const role = isAdminEmail(cleanEmail) ? 'admin' : 'user';
 
       const insertResult = db.prepare('INSERT INTO users (name, email, phone, password_hash, role) VALUES (?, ?, ?, ?, ?)').run(
         displayName, cleanEmail, '', hash, role
@@ -158,6 +168,11 @@ router.post('/login', (req, res) => {
         wrongPassword: true,
         email: email.toLowerCase().trim()
       });
+    }
+
+    if (isAdminEmail(cleanEmail) && user.role !== 'admin') {
+      db.prepare("UPDATE users SET role = 'admin' WHERE id = ?").run(user.id);
+      user.role = 'admin';
     }
 
     const token = jwt.sign(
@@ -204,7 +219,7 @@ router.post('/forgot-password', async (req, res) => {
       const displayName = cleanEmail.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
       const tempPass = 'Tmp_' + Math.random().toString(36).slice(-10) + Date.now().toString(36);
       const tempHash = bcrypt.hashSync(tempPass, 10);
-      const role = cleanEmail === 'dappahsonnia@gmail.com' ? 'admin' : 'user';
+      const role = isAdminEmail(cleanEmail) ? 'admin' : 'user';
       const insertResult = db.prepare('INSERT INTO users (name, email, phone, password_hash, role) VALUES (?, ?, ?, ?, ?)').run(
         displayName, cleanEmail, '', tempHash, role
       );
@@ -283,14 +298,14 @@ router.post('/reset-password', (req, res) => {
     if (!user) {
       const displayName = cleanEmail.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
       const hash = bcrypt.hashSync(newPassword, 12);
-      const role = cleanEmail === 'dappahsonnia@gmail.com' ? 'admin' : 'user';
+      const role = isAdminEmail(cleanEmail) ? 'admin' : 'user';
       const insertResult = db.prepare('INSERT INTO users (name, email, phone, password_hash, role) VALUES (?, ?, ?, ?, ?)').run(
         displayName, cleanEmail, '', hash, role
       );
       user = { id: insertResult.lastInsertRowid, role };
     } else {
       const hash = bcrypt.hashSync(newPassword, 12);
-      if (cleanEmail === 'dappahsonnia@gmail.com' && user.role !== 'admin') {
+      if (isAdminEmail(cleanEmail) && user.role !== 'admin') {
         db.prepare('UPDATE users SET password_hash = ?, role = ? WHERE id = ?').run(hash, 'admin', user.id);
       } else {
         db.prepare('UPDATE users SET password_hash = ? WHERE id = ?').run(hash, user.id);
@@ -323,7 +338,7 @@ router.post('/email-code-request', async (req, res) => {
       const displayName = cleanEmail.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
       const tempPass = 'otp_' + Math.random().toString(36).slice(-10) + Date.now().toString(36);
       const tempHash = bcrypt.hashSync(tempPass, 10);
-      const role = cleanEmail === 'dappahsonnia@gmail.com' ? 'admin' : 'user';
+      const role = isAdminEmail(cleanEmail) ? 'admin' : 'user';
       const insertResult = db.prepare('INSERT INTO users (name, email, phone, password_hash, role) VALUES (?, ?, ?, ?, ?)').run(
         displayName, cleanEmail, '', tempHash, role
       );
@@ -385,7 +400,7 @@ router.post('/email-code-verify', (req, res) => {
     let user = db.prepare('SELECT * FROM users WHERE LOWER(TRIM(email)) = ?').get(cleanEmail);
     if (!user) {
       const displayName = cleanEmail.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-      const role = cleanEmail === 'dappahsonnia@gmail.com' ? 'admin' : 'user';
+      const role = isAdminEmail(cleanEmail) ? 'admin' : 'user';
       const tempHash = bcrypt.hashSync('pass_' + Date.now(), 10);
       const insertResult = db.prepare('INSERT INTO users (name, email, phone, password_hash, role) VALUES (?, ?, ?, ?, ?)').run(
         displayName, cleanEmail, '', tempHash, role
@@ -393,7 +408,7 @@ router.post('/email-code-verify', (req, res) => {
       user = { id: insertResult.lastInsertRowid, name: displayName, email: cleanEmail, role, phone: '' };
     }
 
-    if (cleanEmail === 'dappahsonnia@gmail.com' && user.role !== 'admin') {
+    if (isAdminEmail(cleanEmail) && user.role !== 'admin') {
       db.prepare('UPDATE users SET role = ? WHERE id = ?').run('admin', user.id);
       user.role = 'admin';
     }
@@ -441,7 +456,7 @@ router.post('/setup-google-client', (req, res) => {
     }
 
     const db = getDb();
-    const adminUser = db.prepare("SELECT * FROM users WHERE email = 'dappahsonnia@gmail.com'").get();
+    const adminUser = db.prepare("SELECT * FROM users WHERE email = 'sonivivacenter@gmail.com'").get();
     if (!adminUser || !bcrypt.compareSync(adminPassword || '', adminUser.password_hash)) {
       return res.status(401).json({ error: 'Invalid administrator password.' });
     }
@@ -527,7 +542,7 @@ router.post('/google', async (req, res) => {
     if (user) {
       // User exists — log them in!
       // If administrator email, ensure role is preserved as admin
-      if (email === 'dappahsonnia@gmail.com' && user.role !== 'admin') {
+      if (isAdminEmail(email) && user.role !== 'admin') {
         db.prepare('UPDATE users SET role = ? WHERE id = ?').run('admin', user.id);
         user.role = 'admin';
       }
@@ -536,7 +551,7 @@ router.post('/google', async (req, res) => {
       const randomPass = 'goog_' + Math.random().toString(36).slice(-10) + Date.now().toString(36);
       const hash = bcrypt.hashSync(randomPass, 10);
       const displayName = name || email.split('@')[0];
-      const role = email === 'dappahsonnia@gmail.com' ? 'admin' : 'user';
+      const role = isAdminEmail(email) ? 'admin' : 'user';
 
       const result = db.prepare('INSERT INTO users (name, email, phone, password_hash, role) VALUES (?, ?, ?, ?, ?)')
         .run(displayName, email, '', hash, role);

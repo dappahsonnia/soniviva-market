@@ -4,7 +4,7 @@
    ========================================= */
 const nodemailer = require('nodemailer');
 
-const ADMIN_EMAIL = 'dappahsonnia@gmail.com';
+const ADMIN_EMAIL = 'sonivivacenter@gmail.com';
 const SMTP_USER = process.env.SMTP_USER || ADMIN_EMAIL;
 const SMTP_PASS = process.env.SMTP_PASS || process.env.GMAIL_APP_PASSWORD || '';
 

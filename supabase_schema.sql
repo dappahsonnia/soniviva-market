@@ -105,11 +105,11 @@ ALTER TABLE public.order_items ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Public categories are viewable by everyone" ON public.categories FOR SELECT USING (true);
 CREATE POLICY "Public products are viewable by everyone" ON public.products FOR SELECT USING (true);
 
--- 9. SEED PRIMARY ADMIN (dappahsonnia@gmail.com / Sonnita0275)
+-- 9. SEED PRIMARY ADMIN (sonivivacenter@gmail.com / Sonnita0275)
 INSERT INTO public.users (name, email, phone, password_hash, role, city, region)
 VALUES (
     'Sonnia Dappah (Admin)',
-    'dappahsonnia@gmail.com',
+    'sonivivacenter@gmail.com',
     '0256322653',
     '$2a$12$0G2c9dD7jYgZ7L/Y/3B.6e7C0zR3xQhM8JzT5V2K9P1X8Z0A2B4C6',
     'admin',
